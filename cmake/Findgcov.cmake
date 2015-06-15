@@ -7,6 +7,23 @@ include(FindPackageHandleStandardArgs)
 
 
 #
+# search for binaries
+#
+find_program(GCOV_BIN gcov)
+find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
+
+
+
+#
+# add a global coverage target
+#
+if (NOT TARGET gcov AND GCOV_FOUND)
+	add_custom_target(gcov)
+endif ()
+
+
+
+#
 # check for coverage compiler flags
 #
 set(CMAKE_REQUIRED_FLAGS "--coverage")
@@ -70,17 +87,7 @@ endif ()
 #
 # collect gcov information for target
 #
-
-# search for gcov
-find_program(GCOV_BIN gcov)
-
-function(add_coverage TARGET)
-	# enable coverage for target
-	set_target_properties(${TARGET} PROPERTIES
-		COMPILE_FLAGS "-g -O0 --coverage"
-		LINK_FLAGS "--coverage"
-	)
-
+function (add_gcov_target TARGET)
 	set(TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir)
 
 	get_target_property(TARGET_SOURCES ${TARGET} SOURCES)
@@ -99,17 +106,24 @@ function(add_coverage TARGET)
 		list(APPEND BUFFER ${TARGET_DIR}/${FILE}.gcov)
 	endforeach()
 
-	add_custom_target(${TARGET}-coverage
+	add_custom_target(${TARGET}-gcov
 		DEPENDS ${BUFFER}
 	)
 
-	add_dependencies(coverage ${TARGET}-coverage)
+	add_dependencies(gcov ${TARGET}-gcov)
+endfunction (add_gcov_target)
+
+
+
+#
+# add coverage to target and register target for gcov
+#
+function(add_coverage TARGET)
+	# enable coverage for target
+	set_target_properties(${TARGET} PROPERTIES
+		COMPILE_FLAGS "-g -O0 --coverage"
+		LINK_FLAGS "--coverage"
+	)
+
+	add_gcov_target(${TARGET})
 endfunction(add_coverage)
-
-
-#
-# add a global coverage target
-#
-if (NOT TARGET coverage)
-	add_custom_target(coverage)
-endif ()
