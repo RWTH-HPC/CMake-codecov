@@ -7,23 +7,6 @@ include(FindPackageHandleStandardArgs)
 
 
 #
-# search for binaries
-#
-find_program(GCOV_BIN gcov)
-find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
-
-
-
-#
-# add a global coverage target
-#
-if (NOT TARGET gcov AND GCOV_FOUND)
-	add_custom_target(gcov)
-endif ()
-
-
-
-#
 # check for coverage compiler flags
 #
 set(CMAKE_REQUIRED_FLAGS "--coverage")
@@ -87,31 +70,42 @@ endif ()
 #
 # collect gcov information for target
 #
-function (add_gcov_target TARGET)
-	set(TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir)
+find_program(GCOV_BIN gcov)
+find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
 
-	get_target_property(TARGET_SOURCES ${TARGET} SOURCES)
-	set(BUFFER "")
-	foreach(FILE ${TARGET_SOURCES})
-		get_filename_component(FILE_PATH "${TARGET_DIR}/${FILE}" PATH)
 
-		add_custom_command(OUTPUT ${TARGET_DIR}/${FILE}.gcov
-			COMMAND ${GCOV_BIN} ${TARGET_DIR}/${FILE}.gcno > /dev/null
-			DEPENDS ${TARGET}
-				${TARGET_DIR}/${FILE}.gcda
-				${TARGET_DIR}/${FILE}.gcno
-			WORKING_DIRECTORY ${FILE_PATH}
+if (NOT TARGET gcov AND GCOV_FOUND)
+	add_custom_target(gcov)
+endif ()
+
+
+if (GCOV_FOUND)
+	function (add_gcov_target TARGET)
+		set(TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir)
+
+		get_target_property(TARGET_SOURCES ${TARGET} SOURCES)
+		set(BUFFER "")
+		foreach(FILE ${TARGET_SOURCES})
+			get_filename_component(FILE_PATH "${TARGET_DIR}/${FILE}" PATH)
+
+			add_custom_command(OUTPUT ${TARGET_DIR}/${FILE}.gcov
+				COMMAND ${GCOV_BIN} ${TARGET_DIR}/${FILE}.gcno > /dev/null
+				DEPENDS ${TARGET}
+					${TARGET_DIR}/${FILE}.gcda
+					${TARGET_DIR}/${FILE}.gcno
+				WORKING_DIRECTORY ${FILE_PATH}
+			)
+
+			list(APPEND BUFFER ${TARGET_DIR}/${FILE}.gcov)
+		endforeach()
+
+		add_custom_target(${TARGET}-gcov
+			DEPENDS ${BUFFER}
 		)
 
-		list(APPEND BUFFER ${TARGET_DIR}/${FILE}.gcov)
-	endforeach()
-
-	add_custom_target(${TARGET}-gcov
-		DEPENDS ${BUFFER}
-	)
-
-	add_dependencies(gcov ${TARGET}-gcov)
-endfunction (add_gcov_target)
+		add_dependencies(gcov ${TARGET}-gcov)
+	endfunction (add_gcov_target)
+endif (GCOV_FOUND)
 
 
 
@@ -125,5 +119,7 @@ function(add_coverage TARGET)
 		LINK_FLAGS "--coverage"
 	)
 
-	add_gcov_target(${TARGET})
+	if (GCOV_FOUND)
+		add_gcov_target(${TARGET})
+	endif (GCOV_FOUND)
 endfunction(add_coverage)
