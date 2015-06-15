@@ -24,7 +24,7 @@ if (CXX_COMPILER_HAVE_GCOV)
 	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fprofile-arcs -ftest-coverage")
 endif ()
 
-find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
+find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN CMAKE_C_FLAGS)
 
 
 
@@ -54,4 +54,14 @@ function(add_coverage TARGET)
 	add_custom_target(${TARGET}-coverage
 		DEPENDS ${BUFFER}
 	)
+
+	add_dependencies(coverage ${TARGET}-coverage)
 endfunction(add_coverage)
+
+
+#
+# add a global coverage target
+#
+if (NOT TARGET coverage)
+	add_custom_target(coverage)
+endif ()

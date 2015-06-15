@@ -14,8 +14,7 @@ script:
   - cmake ..
   - make
   - make test
-  - make bar-coverage
-  - make foo-coverage
 
 after_success:
+  - make coverage
   - bash <(curl -s https://codecov.io/bash)
