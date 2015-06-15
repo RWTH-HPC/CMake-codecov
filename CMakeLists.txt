@@ -20,6 +20,7 @@ project("test")
 #
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+enable_testing()
 
 #
 # recurse into subdirectories
