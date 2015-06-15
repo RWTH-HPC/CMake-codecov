@@ -16,6 +16,12 @@ project("test")
 
 
 #
+# cmake configuration
+#
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+
+
+#
 # recurse into subdirectories
 #
 add_subdirectory(src)
