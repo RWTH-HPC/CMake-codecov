@@ -6,33 +6,81 @@ include(CheckCXXCompilerFlag)
 include(FindPackageHandleStandardArgs)
 
 
-# search for gcov
-find_program(GCOV_BIN gcov)
+#
+# check for coverage compiler flags
+#
+set(CMAKE_REQUIRED_FLAGS "--coverage")
 
-# check if compiler accepts
-set(CMAKE_REQUIRED_FLAGS "-fprofile-arcs -ftest-coverage")
+# check for compile flags
+foreach (LANG C CXX)
+	if (CMAKE_${LANG}_COMPILER_LOADED)
+		if (${LANG} STREQUAL C)
+			check_c_compiler_flag("-g -O0 --coverage" HAVE_COVERAGE_C)
+		elseif (${LANG} STREQUAL CXX)
+			check_cxx_compiler_flag("-g -O0 --coverage" HAVE_COVERAGE_CXX)
+		endif()
 
-# check for C
-check_c_compiler_flag("-fprofile-arcs -ftest-coverage" C_COMPILER_HAVE_GCOV)
-if (C_COMPILER_HAVE_GCOV)
-	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-fprofile-arcs -ftest-coverage")
+		if (HAVE_COVERAGE_${LANG})
+			set(CMAKE_${LANG}_FLAGS_COVERAGE
+				"-g -O0 --coverage"
+				CACHE
+				STRING "Flags used by the ${LANG} compiler during coverage builds."
+			)
+			mark_as_advanced(CMAKE_${LANG}_FLAGS_COVERAGE)
+		endif (HAVE_COVERAGE_${LANG})
+	endif (CMAKE_${LANG}_COMPILER_LOADED)
+endforeach()
+
+# set linker flags
+if (HAVE_COVERAGE_C OR HAVE_COVERAGE_CXX)
+	set(CMAKE_EXE_LINKER_FLAGS_COVERAGE
+		"--coverage"
+		CACHE
+		STRING "Flags used for linking binaries during coverage builds."
+	)
+
+	set(CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+		"--coverage"
+		CACHE
+		STRING "Flags used for linking modules during coverage builds."
+	)
+
+	set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+		"--coverage"
+		CACHE
+		STRING "Flags used for linking shared libraries during coverage builds."
+	)
+
+	set(CMAKE_STATIC_LINKER_FLAGS_COVERAGE
+		"--coverage"
+		CACHE
+		STRING "Flags used for linking static libraries during coverage builds."
+	)
+
+	mark_as_advanced(
+		CMAKE_EXE_LINKER_FLAGS_COVERAGE
+		CMAKE_MODULE_LINKER_FLAGS_COVERAGE
+		CMAKE_SHARED_LINKER_FLAGS_COVERAGE
+		CMAKE_STATIC_LINKER_FLAGS_COVERAGE
+	)
 endif ()
-
-# check for CXX
-check_cxx_compiler_flag("-fprofile-arcs -ftest-coverage" CXX_COMPILER_HAVE_GCOV)
-if (CXX_COMPILER_HAVE_GCOV)
-	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-fprofile-arcs -ftest-coverage")
-endif ()
-
-find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN CMAKE_C_FLAGS)
-
 
 
 
 #
 # collect gcov information for target
 #
+
+# search for gcov
+find_program(GCOV_BIN gcov)
+
 function(add_coverage TARGET)
+	# enable coverage for target
+	set_target_properties(${TARGET} PROPERTIES
+		COMPILE_FLAGS "-g -O0 --coverage"
+		LINK_FLAGS "--coverage"
+	)
+
 	set(TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir)
 
 	get_target_property(TARGET_SOURCES ${TARGET} SOURCES)
