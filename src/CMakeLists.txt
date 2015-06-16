@@ -1,3 +1,5 @@
+find_package(gcov)
+
 #
 # recurse into subdirectories
 #

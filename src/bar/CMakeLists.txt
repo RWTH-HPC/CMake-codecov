@@ -4,4 +4,5 @@ target_link_libraries(bar foo)
 
 add_test(bar_test ${CMAKE_CURRENT_BINARY_DIR}/bar)
 
+find_package(gcov)
 add_coverage(bar)
