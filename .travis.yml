@@ -11,7 +11,7 @@ before_install:
 
 script:
   - mkdir build && cd build
-  - cmake ..
+  - cmake .. -DENABLE_COVERAGE=On
   - make
   - make test
 
