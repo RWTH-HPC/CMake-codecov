@@ -53,7 +53,7 @@ function(add_coverage TNAME)
 	endif ()
 
 	# create coverage target for this target
-	add_custom_target(${TNAME}-coverage)
+	add_custom_target(${TNAME}-coverage DEPENDS ${TNAME})
 
 	# enable coverage for target
 	set_target_properties(${TNAME} PROPERTIES
@@ -136,11 +136,18 @@ endif ()
 
 
 #
-# gcov support
+# Modules for parsing the collected data and output it in a readable format
+# (like gcov).
+#
+include(FindPackageHandleStandardArgs)
+
+
+
+#
+# gcov
 #
 
 # Search for gcov binary.
-include(FindPackageHandleStandardArgs)
 find_program(GCOV_BIN gcov)
 find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
 
@@ -154,6 +161,10 @@ endif ()
 
 
 if (GCOV_FOUND)
+	# This function will add gcov evaluation for target <TNAME>. Only sources of
+	# this target will be evaluated and no dependencies will be added. It will
+	# call gcov on any source file of <TNAME> once and store the gcov file in
+	# the same directory.
 	function (add_gcov_target TNAME)
 		set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
 
@@ -162,6 +173,7 @@ if (GCOV_FOUND)
 		foreach(FILE ${TSOURCES})
 			get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
 
+			# call gcov
 			add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
 				COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcda > /dev/null
 				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcda
@@ -171,7 +183,10 @@ if (GCOV_FOUND)
 			list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
 		endforeach()
 
+		# add target for gcov evaluation of <TNAME>
 		add_custom_target(${TNAME}-gcov DEPENDS ${BUFFER})
+
+		# add evaluation target to <TNAME>-coverage and the global gcov target.
 		add_dependencies(${TNAME}-coverage ${TNAME}-gcov)
 		add_dependencies(gcov ${TNAME}-gcov)
 	endfunction (add_gcov_target)
