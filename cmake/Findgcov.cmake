@@ -108,40 +108,45 @@ endif()
 
 
 
-#
-# collect gcov information for target
-#
-include(FindPackageHandleStandardArgs)
 
+
+#
+# gcov support
+#
+
+# Search for gcov binary.
+include(FindPackageHandleStandardArgs)
 find_program(GCOV_BIN gcov)
 find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
 
 
 # Add a new global target for all gcov targets. This target could be used to
-# generate the gcov files for the whole project.
+# generate the gcov files for the whole project instead of calling <TARGET>-gcov
+# for each target.
 if (GCOV_FOUND AND NOT TARGET gcov)
 	add_custom_target(gcov)
 endif ()
 
+
 if (GCOV_FOUND)
-	function (add_gcov_target TARGET)
-		set(TARGET_DIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TARGET}.dir)
+	function (add_gcov_target TNAME)
+		set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
 
-		get_target_property(TARGET_SOURCES ${TARGET} SOURCES)
+		get_target_property(TSOURCES ${TNAME} SOURCES)
 		set(BUFFER "")
-		foreach(FILE ${TARGET_SOURCES})
-			get_filename_component(FILE_PATH "${TARGET_DIR}/${FILE}" PATH)
+		foreach(FILE ${TSOURCES})
+			get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
 
-			add_custom_command(OUTPUT ${TARGET_DIR}/${FILE}.gcov
-				COMMAND ${GCOV_BIN} ${TARGET_DIR}/${FILE}.gcda > /dev/null
-				DEPENDS ${TARGET} ${TARGET_DIR}/${FILE}.gcda
+			add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
+				COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcda > /dev/null
+				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcda
 				WORKING_DIRECTORY ${FILE_PATH}
 			)
 
-			list(APPEND BUFFER ${TARGET_DIR}/${FILE}.gcov)
+			list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
 		endforeach()
 
-		add_custom_target(${TARGET}-gcov DEPENDS ${BUFFER})
-		add_dependencies(gcov ${TARGET}-gcov)
+		add_custom_target(${TNAME}-gcov DEPENDS ${BUFFER})
+		add_dependencies(gcov ${TNAME}-gcov)
 	endfunction (add_gcov_target)
 endif (GCOV_FOUND)
