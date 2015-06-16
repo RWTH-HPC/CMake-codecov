@@ -6,15 +6,15 @@ set(COVERAGE_LINKER_FLAGS "--coverage")
 
 
 
-#
-# add coverage to target and register target for gcov
+# Add coverage support for target ${TARGET} and register target for gcov. If
+# coverage is disabled
 #
 function(add_coverage TARGET)
 	if (ENABLE_COVERAGE)
 		# enable coverage for target
 		set_target_properties(${TARGET} PROPERTIES
-			COMPILE_FLAGS "-g -O0 --coverage"
-			LINK_FLAGS "--coverage"
+			COMPILE_FLAGS "${COVERAGE_CFLAGS}"
+			LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
 		)
 
 		if (GCOV_FOUND)
@@ -39,6 +39,39 @@ if (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 		return()
 	endif ()
 
+
+	# Check for coverage compiler flags in C and CXX, if one of those languages
+	# is enabled. At least one language must pass this test to continue
+	# processing this module.
+	include(CheckCCompilerFlag)
+	include(CheckCXXCompilerFlag)
+
+	set(COVERAGE_FOUND false)
+	set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
+	get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+	foreach (LANG ${LANGUAGES})
+		# check compiler for coverage support.
+		if (${LANG} STREQUAL C)
+			check_c_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_C)
+		elseif (${LANG} STREQUAL CXX)
+			check_cxx_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_CXX)
+		endif()
+
+		# announce that we have found a compiler with coverage support.
+		if (HAVE_COVERAGE_${LANG})
+			set(COVERAGE_FOUND true)
+		endif ()
+	endforeach()
+
+	# abort, if no coverage support by compiler. Disable coverage for further
+	# processing, so add_coverage will ignore it.
+	if (NOT COVERAGE_FOUND)
+		message(WARNING "No compiler supports coverage.")
+		set(ENABLE_COVERAGE OFF)
+		return()
+	endif()
+
+
 	# Add an option to choose, if coverage should be enabled for all targets,
 	# even those which are not explictly marked as coverage targets. If
 	# disabled, only targets added by add_coverage will be marked for coverage
@@ -48,47 +81,13 @@ endif (${CMAKE_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
 
 
 
-#
-# check for coverage compiler flags
-#
-
-# include required modules
-include(CheckCCompilerFlag)
-include(CheckCXXCompilerFlag)
-include(FindPackageHandleStandardArgs)
-
-# check for linker flag
-set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
-
-# check for compile flags
-get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
-foreach (LANG ${LANGUAGES})
-	if (${LANG} STREQUAL C)
-		check_c_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_C)
-	elseif (${LANG} STREQUAL CXX)
-		check_cxx_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_CXX)
-	endif()
-
-	if (HAVE_COVERAGE_${LANG})
-		set(CMAKE_${LANG}_FLAGS_COVERAGE
-			"${COVERAGE_CFLAGS}"
-			CACHE
-			STRING "Flags used by the ${LANG} compiler during coverage builds."
-		)
-		mark_as_advanced(CMAKE_${LANG}_FLAGS_COVERAGE)
-	endif (HAVE_COVERAGE_${LANG})
-endforeach()
-
-# abort, if no coverage support by compiler
-if (NOT (HAVE_COVERAGE_C OR HAVE_COVERAGE_CXX))
-	message(WARNING "Compiler does not support coverage.")
-	return()
-endif()
 
 
 #
 # collect gcov information for target
 #
+include(FindPackageHandleStandardArgs)
+
 find_program(GCOV_BIN gcov)
 find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
 
