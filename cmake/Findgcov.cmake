@@ -89,10 +89,9 @@ if (GCOV_FOUND)
 			get_filename_component(FILE_PATH "${TARGET_DIR}/${FILE}" PATH)
 
 			add_custom_command(OUTPUT ${TARGET_DIR}/${FILE}.gcov
-				COMMAND ${GCOV_BIN} ${TARGET_DIR}/${FILE}.gcno > /dev/null
+				COMMAND ${GCOV_BIN} ${TARGET_DIR}/${FILE}.gcda > /dev/null
 				DEPENDS ${TARGET}
 					${TARGET_DIR}/${FILE}.gcda
-					${TARGET_DIR}/${FILE}.gcno
 				WORKING_DIRECTORY ${FILE_PATH}
 			)
 
