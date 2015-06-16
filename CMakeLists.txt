@@ -14,13 +14,13 @@ endif (POLICY CMP0042)
 #
 project("test")
 
-
 #
 # cmake configuration
 #
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 enable_testing()
+find_package(gcov)
 
 #
 # recurse into subdirectories
