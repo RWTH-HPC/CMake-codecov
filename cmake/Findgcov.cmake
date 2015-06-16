@@ -45,18 +45,26 @@ endif ()
 # add_coverage, even if there is no support for coverage, to not break build-
 # scripts.
 #
-function(add_coverage TARGET)
-	if (ENABLE_COVERAGE)
-		# enable coverage for target
-		set_target_properties(${TARGET} PROPERTIES
-			COMPILE_FLAGS "${COVERAGE_CFLAGS}"
-			LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
-		)
+function(add_coverage TNAME)
+	# If coverage is disabled, or coverage is already enabled for this target,
+	# we can skip the execution of this function.
+	if (NOT ENABLE_COVERAGE OR TARGET ${TNAME}-coverage)
+		return()
+	endif ()
 
-		if (GCOV_FOUND)
-			add_gcov_target(${TARGET})
-		endif (GCOV_FOUND)
-	endif(ENABLE_COVERAGE)
+	# create coverage target for this target
+	add_custom_target(${TNAME}-coverage)
+
+	# enable coverage for target
+	set_target_properties(${TNAME} PROPERTIES
+		COMPILE_FLAGS "${COVERAGE_CFLAGS}"
+		LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
+	)
+
+	# add gcov execution target
+	if (GCOV_FOUND)
+		add_gcov_target(${TNAME})
+	endif (GCOV_FOUND)
 endfunction(add_coverage)
 
 
@@ -108,6 +116,23 @@ endif()
 
 
 
+# If ENABLE_COVERAGE_ALL is enabled, overload add_executable and add_library
+# functions, to add coverage support for *ALL* targets. The functions will call
+# the overloaded functions first and then add_coverage.
+if (ENABLE_COVERAGE_ALL)
+	function(add_executable ARGV)
+		_add_executable(${ARGV})
+		add_coverage(${ARGV0})
+	endfunction(add_executable)
+
+	function(add_library ARGV)
+		_add_library(${ARGV})
+		add_coverage(${ARGV0})
+	endfunction(add_library)
+endif ()
+
+
+
 
 
 #
@@ -147,6 +172,7 @@ if (GCOV_FOUND)
 		endforeach()
 
 		add_custom_target(${TNAME}-gcov DEPENDS ${BUFFER})
+		add_dependencies(${TNAME}-coverage ${TNAME}-gcov)
 		add_dependencies(gcov ${TNAME}-gcov)
 	endfunction (add_gcov_target)
 endif (GCOV_FOUND)
