@@ -268,10 +268,10 @@ if (LCOV_FOUND)
 		add_custom_target(lcov-genhtml
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMAND ${GENHTML_BIN}
+				-q
 				-t ${CMAKE_PROJECT_NAME}
 				-o ${CMAKE_BINARY_DIR}/lcov/project
 				`find . -name \"*.tgt.info\"`
-				> /dev/null
 		)
 	endif (NOT TARGET lcov-genhtml)
 
@@ -284,10 +284,10 @@ if (LCOV_FOUND)
 		add_custom_target(lcov
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMAND ${GENHTML_BIN}
+				-q
 				-t ${CMAKE_PROJECT_NAME}
 				-o ${CMAKE_BINARY_DIR}/lcov/project
 				`find . -name \"*.tgt.info\"`
-				> /dev/null
 			DEPENDS lcov-geninfo
 		)
 	endif ()
