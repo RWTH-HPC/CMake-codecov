@@ -56,10 +56,15 @@ function(add_coverage TNAME)
 	add_custom_target(${TNAME}-coverage DEPENDS ${TNAME})
 
 	# enable coverage for target
-	set_target_properties(${TNAME} PROPERTIES
-		COMPILE_FLAGS "${COVERAGE_CFLAGS}"
-		LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
+	set_property(TARGET ${TNAME}
+		APPEND_STRING
+		PROPERTY COMPILE_FLAGS "${COVERAGE_CFLAGS}"
 	)
+	set_property(TARGET ${TNAME}
+		APPEND_STRING
+		PROPERTY LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
+	)
+
 
 	# add gcov evaluation
 	if (GCOV_FOUND)
