@@ -61,7 +61,7 @@ function(add_coverage TNAME)
 		LINK_FLAGS "${COVERAGE_LINKER_FLAGS}"
 	)
 
-	# add gcov execution target
+	# add gcov evaluation
 	if (GCOV_FOUND)
 		add_gcov_target(${TNAME})
 	endif (GCOV_FOUND)
@@ -191,8 +191,7 @@ if (GCOV_FOUND)
 		# add target for gcov evaluation of <TNAME>
 		add_custom_target(${TNAME}-gcov DEPENDS ${BUFFER})
 
-		# add evaluation target to <TNAME>-coverage and the global gcov target.
-		add_dependencies(${TNAME}-coverage ${TNAME}-gcov)
+		# add evaluation target to the global gcov target.
 		add_dependencies(gcov ${TNAME}-gcov)
 	endfunction (add_gcov_target)
 endif (GCOV_FOUND)
