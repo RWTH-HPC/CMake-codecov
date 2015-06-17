@@ -126,12 +126,44 @@ endif()
 # the overloaded functions first and then add_coverage.
 if (ENABLE_COVERAGE_ALL)
 	function(add_executable ARGV)
+		# add executable
 		_add_executable(${ARGV})
+
+		# check if target is supported for code coverage
+		get_target_property(TSOURCES ${ARGV0} SOURCES)
+		foreach (FILE ${TSOURCES})
+			get_source_file_property(SLANG ${FILE} LANGUAGE)
+			if ((NOT ${SLANG} STREQUAL "C") AND (NOT ${SLANG} STREQUAL "CXX"))
+				# Target has source files that are not supported for code
+				# coverage. Do not add coverage for this target and print a
+				# warning.
+				message("-- Code coverage not supported for target ${ARGV0}")
+				return()
+			endif()
+		endforeach ()
+
+		# add coverage
 		add_coverage(${ARGV0})
 	endfunction(add_executable)
 
 	function(add_library ARGV)
+		# add library
 		_add_library(${ARGV})
+
+		# check if target is supported for code coverage
+		get_target_property(TSOURCES ${ARGV0} SOURCES)
+		foreach (FILE ${TSOURCES})
+			get_source_file_property(SLANG ${FILE} LANGUAGE)
+			if ((NOT ${SLANG} STREQUAL "C") AND (NOT ${SLANG} STREQUAL "CXX"))
+				# Target has source files that are not supported for code
+				# coverage. Do not add coverage for this target and print a
+				# warning.
+				message("-- Code coverage not supported for target ${ARGV0}")
+				return()
+			endif()
+		endforeach ()
+
+		# add coverage
 		add_coverage(${ARGV0})
 	endfunction(add_library)
 endif ()
