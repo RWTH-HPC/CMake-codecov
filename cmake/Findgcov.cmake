@@ -211,30 +211,47 @@ find_package_handle_standard_args(lcov
 )
 
 
-# Add a new global target for all lcov targets. This target could be used to
-# generate the lcov html output for the whole project instead of calling
-# <TARGET>-geninfo and <TARGET>-html for each target. It will also be used to
-# generate a html site for all project data together instead of one for each
-# target.
+# Add global targets for lcov.
 if (LCOV_FOUND)
+	# Add a new global target to generate target .info files for all targets.
+	# This target could be used to generate the .tgt.info files for the whole
+	# project instead of calling <TARGET>-geninfo for each target.
 	if (NOT TARGET lcov-geninfo)
 		add_custom_target(lcov-geninfo)
 	endif (NOT TARGET lcov-geninfo)
 
+	# Add a new global target to generate the lcov html report for the whole
+	# project instead of calling <TARGET>-genhtml for each target (to create
+	# an own report for each target). Instead of the lcov target it does not
+	# require geninfo for all targets, so you have to call <TARGET>-geninfo to
+	# generate the info files the targets you'd like to have in your report or
+	# lcov-geninfo for generating info files for all targets before calling
+	# lcov-genhtml.
 	if (NOT TARGET lcov-genhtml)
 		add_custom_target(lcov-genhtml
 			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
 			COMMAND ${GENHTML_BIN}
 				-t ${CMAKE_PROJECT_NAME}
 				-o ${CMAKE_BINARY_DIR}/lcov/project
-				`find . -name \"*.info\"`
+				`find . -name \"*.tgt.info\"`
 				> /dev/null
 		)
 	endif (NOT TARGET lcov-genhtml)
 
+	# Add a new global target for all lcov targets. This target could be used to
+	# generate the lcov html output for the whole project instead of calling
+	# <TARGET>-geninfo and <TARGET>-genhtml for each target. It will also be
+	# used to generate a html site for all project data together instead of one
+	# for each target.
 	if (NOT TARGET lcov)
 		add_custom_target(lcov
-			DEPENDS lcov-geninfo lcov-genhtml
+			WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+			COMMAND ${GENHTML_BIN}
+				-t ${CMAKE_PROJECT_NAME}
+				-o ${CMAKE_BINARY_DIR}/lcov/project
+				`find . -name \"*.tgt.info\"`
+				> /dev/null
+			DEPENDS lcov-geninfo
 		)
 	endif ()
 endif ()
