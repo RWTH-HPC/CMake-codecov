@@ -38,43 +38,20 @@ endif ()
 
 
 
-# Add coverage support for target ${TARGET} and register target for gcov. If
-# coverage is disabled or not supported, this function will simply do nothing.
+# Add coverage support for target ${TNAME} and register target for coverage
+# evaluation. If coverage is disabled or not supported, this function will
+# simply do nothing.
 #
-# Note: This function is defined at the top of this module to explictly define
-# add_coverage, even if there is no support for coverage, to not break build-
-# scripts.
+# Note: This function is only a wrapper to define this function always, even if
+#   coverage is not supported by the compiler or disabled. This function must
+#   stay here, because the module will be exited, if there is no coverage
+#   support by the compiler or it is disabled by the user.
 #
 function(add_coverage TNAME)
-	# If coverage is disabled, or coverage is already enabled for this target,
-	# we can skip the execution of this function.
-	if (NOT ENABLE_COVERAGE OR TARGET ${TNAME}-coverage)
-		return()
+	# only add coverage for target, if coverage is support and enabled.
+	if (ENABLE_COVERAGE)
+		add_coverage_target(${TNAME})
 	endif ()
-
-	# create coverage target for this target
-	add_custom_target(${TNAME}-coverage DEPENDS ${TNAME})
-
-	# enable coverage for target
-	set_property(TARGET ${TNAME}
-		APPEND_STRING
-		PROPERTY COMPILE_FLAGS " ${COVERAGE_CFLAGS}"
-	)
-	set_property(TARGET ${TNAME}
-		APPEND_STRING
-		PROPERTY LINK_FLAGS " ${COVERAGE_LINKER_FLAGS}"
-	)
-
-
-	# add gcov evaluation
-	if (GCOV_FOUND)
-		add_gcov_target(${TNAME})
-	endif (GCOV_FOUND)
-
-	# add lcov evaluation
-	if (LCOV_FOUND)
-		add_lcov_target(${TNAME})
-	endif (LCOV_FOUND)
 endfunction(add_coverage)
 
 
@@ -116,7 +93,7 @@ foreach (LANG ${LANGUAGES})
 	endif ()
 endforeach()
 
-# abort, if no coverage support by compiler. Disable coverage for further
+# Abort, if no coverage support by compiler. Disable coverage for further
 # processing, so add_coverage will ignore it.
 if (NOT COVERAGE_FOUND)
 	message(WARNING "No compiler supports coverage.")
@@ -124,6 +101,42 @@ if (NOT COVERAGE_FOUND)
 	return()
 endif()
 
+
+
+# Add coverage support for target ${TNAME} and register target for coverage
+# evaluation.
+#
+function(add_coverage_target TNAME)
+	# If coverage is already enabled for this target, we can skip the execution
+	# of this function.
+	if (TARGET ${TNAME}-coverage)
+		return()
+	endif ()
+
+	# create coverage target for this target
+	add_custom_target(${TNAME}-coverage DEPENDS ${TNAME})
+
+	# enable coverage for target
+	set_property(TARGET ${TNAME}
+		APPEND_STRING
+		PROPERTY COMPILE_FLAGS " ${COVERAGE_CFLAGS}"
+	)
+	set_property(TARGET ${TNAME}
+		APPEND_STRING
+		PROPERTY LINK_FLAGS " ${COVERAGE_LINKER_FLAGS}"
+	)
+
+
+	# add gcov evaluation
+	if (GCOV_FOUND)
+		add_gcov_target(${TNAME})
+	endif (GCOV_FOUND)
+
+	# add lcov evaluation
+	if (LCOV_FOUND)
+		add_lcov_target(${TNAME})
+	endif (LCOV_FOUND)
+endfunction(add_coverage_target)
 
 
 # If ENABLE_COVERAGE_ALL is enabled, overload add_executable and add_library
