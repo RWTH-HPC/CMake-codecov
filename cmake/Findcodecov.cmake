@@ -127,6 +127,27 @@ function(add_coverage_target TNAME)
 	)
 
 
+	# Add check-targets for .gcda files. These should help to allow global
+	# evaluation targets, even if there are no .gcda files for all targets. If
+	# the .gcda file is not available, an empty one will be created, so gcov and
+	# lcov can continue execution.
+	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
+
+	get_target_property(TSOURCES ${TNAME} SOURCES)
+	set(BUFFER "")
+	foreach(FILE ${TSOURCES})
+		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
+
+		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcda
+			COMMAND touch ${TDIR}/${FILE}.gcda
+			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
+			WORKING_DIRECTORY ${FILE_PATH}
+			COMMENT "${FILE}.gcda not available"
+		)
+	endforeach()
+
+
+
 	# add gcov evaluation
 	if (GCOV_FOUND)
 		add_gcov_target(${TNAME})
