@@ -4,9 +4,12 @@
 
 
 int
-main ()
+main (int argc, char** argv)
 {
-	printf("%d\n", foo());
+	if (argc == 1)
+		printf("%d\n", foo());
+	else
+		printf("%d\n", bar());
 
 	return 0;
 }
