@@ -25,3 +25,7 @@ enable_testing()
 # recurse into subdirectories
 #
 add_subdirectory(src)
+
+
+# add lcov HTML reports
+lcov_capture()

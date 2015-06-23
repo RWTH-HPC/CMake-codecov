@@ -37,8 +37,8 @@ function (add_gcov_target TNAME)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcda > /dev/null
-			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcda
+			COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${FILE_PATH}
 		)
 

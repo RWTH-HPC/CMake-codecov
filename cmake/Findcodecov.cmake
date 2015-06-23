@@ -137,15 +137,7 @@ function(add_coverage_target TNAME)
 	set(BUFFER "")
 	foreach(FILE ${TSOURCES})
 		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
-
-		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcda
-			COMMAND touch ${TDIR}/${FILE}.gcda
-			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-			WORKING_DIRECTORY ${FILE_PATH}
-			COMMENT "${FILE}.gcda not available"
-		)
 	endforeach()
-
 
 
 	# add gcov evaluation
