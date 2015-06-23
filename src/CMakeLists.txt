@@ -1,5 +1,3 @@
-find_package(codecov)
-
 #
 # recurse into subdirectories
 #
