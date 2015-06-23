@@ -332,11 +332,11 @@ endfunction (add_lcov_target)
 # all targets, so you have to call <TARGET>-geninfo to generate the info files
 # the targets you'd like to have in your report or lcov-geninfo for generating
 # info files for all targets before calling lcov-genhtml.
-file(MAKE_DIRECTORY ${LCOV_HTML_PATH}/captured_data)
+file(MAKE_DIRECTORY ${LCOV_HTML_PATH}/selected_targets)
 add_custom_target(lcov-genhtml
 	COMMAND ${GENHTML_BIN}
 		--quiet
-		--output-directory ${LCOV_HTML_PATH}/captured_data
+		--output-directory ${LCOV_HTML_PATH}/selected_targets
 		--title \"${CMAKE_PROJECT_NAME} - targets `find ${LCOV_DATA_PATH_CAPTURE} -name \"*.info\" ! -name \"all_targets.info\" -exec basename {} .info \\\;`\"
 		--prefix ${PROJECT_SOURCE_DIR}
 		--sort

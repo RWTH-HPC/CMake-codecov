@@ -70,13 +70,10 @@ Lcov is a console program to evaluate the generate coverage data, but instead of
 | target  | description |
 |---------|-------------|
 |```<TARGET>-geninfo```|Evaluate coverage data for target ```<TARGET>```.|
-|```<TARGET>-genhtml```|Generate a report for a specific target *(and only this one, even if it has dependencies!)*. This target will call ```<TARGET>-geninfo``` before.|
+|```<TARGET>-genhtml```|Generate a report for a specific target *(and only this one, even if it has dependencies!)*. This target will call ```<TARGET>-geninfo``` before. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/<TARGET>```.|
 |```lcov-geninfo```|Evaluate the coverage data of all your targets.|
-|```lcov-genhtml```|Generate a *single* report for all evaluated data that is available now. **Note:** You have to call ```<TARGET>-geninfo``` for all targets you want to have in this report before calling this target or ```lcov-geninfo```. You can use this option, if you like to have a single report for the targets ```foo``` and ```bar``` together, but without all the other targets.|
-|```lcov```|Generate a *single* report for all targets. This target will call ```lcov-geninfo``` before.|
-
-Single reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/project```, reports for a specific target in ```${CMAKE_BINARY_DIR}/lcov/<TARGET>```.
-
+|```lcov-genhtml```|Generate a *single* report for all evaluated data that is available now. **Note:** You have to call ```<TARGET>-geninfo``` for all targets you want to have in this report before calling this target or ```lcov-geninfo```. You can use this option, if you like to have a single report for the targets ```foo``` and ```bar``` together, but without all the other targets. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/selected_targets```.|
+|```lcov```|Generate a *single* report for all targets. This target will call ```lcov-geninfo``` before. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/all_targets```.|
 
 
 ## Copyright
