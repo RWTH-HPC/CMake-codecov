@@ -32,5 +32,5 @@ find_package(codecov)
 add_subdirectory(src)
 
 
-# add lcov HTML reports
-lcov_capture()
+# evaluate coverage
+coverage_evaluate()

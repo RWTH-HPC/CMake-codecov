@@ -47,13 +47,27 @@ endif ()
 #   stay here, because the module will be exited, if there is no coverage
 #   support by the compiler or it is disabled by the user.
 #
-function(add_coverage TNAME)
+function (add_coverage TNAME)
 	# only add coverage for target, if coverage is support and enabled.
 	if (ENABLE_COVERAGE)
 		add_coverage_target(${TNAME})
 	endif ()
-endfunction(add_coverage)
+endfunction (add_coverage)
 
+
+
+# Add global target to gather coverage information after all targets have been
+# added. Other evaluation functions could be added here, after checks for the
+# specific module have been passed.
+#
+# Note: This function must stay here, because the module will be exited, if
+# there is no coverage support by the compiler or it is disabled by the user.
+function (coverage_evaluate)
+	# add lcov evaluation
+	if (LCOV_FOUND)
+		lcov_capture()
+	endif (LCOV_FOUND)
+endfunction ()
 
 
 # Exit this module, if coverage is disabled. add_coverage is defined before this
