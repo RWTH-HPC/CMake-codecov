@@ -32,7 +32,10 @@ function (add_gcov_target TNAME)
 
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(BUFFER "")
-	foreach(FILE ${TSOURCES})
+	foreach(FILENAME ${TSOURCES})
+		# get the right path for file
+		string(REPLACE ".." "__" FILE "${FILENAME}")
+
 		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
 
 		# call gcov

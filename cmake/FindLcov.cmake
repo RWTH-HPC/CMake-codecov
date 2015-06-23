@@ -61,7 +61,10 @@ function (lcov_capture_initial_tgt TNAME)
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
-	foreach(FILE ${TSOURCES})
+	foreach(FILENAME ${TSOURCES})
+		# get the right path for filename
+		string(REPLACE ".." "__" FILE "${FILENAME}")
+
 		# get relative path for COMMENT
 		string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
 
@@ -171,7 +174,10 @@ function (lcov_capture_tgt TNAME)
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
-	foreach(FILE ${TSOURCES})
+	foreach(FILENAME ${TSOURCES})
+		# get the right path for file
+		string(REPLACE ".." "__" FILE "${FILENAME}")
+
 		# get relative path for COMMENT
 		string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
 
