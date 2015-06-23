@@ -1,3 +1,11 @@
+# Search for Gcov which is used by Lcov. If it is not found, we can exit this
+# module now.
+find_package(Gcov)
+if (NOT GCOV_FOUND)
+	return()
+endif (NOT GCOV_FOUND)
+
+
 # include required Modules
 include(FindPackageHandleStandardArgs)
 

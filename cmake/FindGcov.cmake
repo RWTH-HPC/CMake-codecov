@@ -17,9 +17,9 @@ endif (NOT GCOV_FOUND)
 # Add a new global target for all gcov targets. This target could be used to
 # generate the gcov files for the whole project instead of calling <TARGET>-gcov
 # for each target.
-if (GCOV_FOUND AND NOT TARGET gcov)
+if (NOT TARGET gcov)
 	add_custom_target(gcov)
-endif ()
+endif (NOT TARGET gcov)
 
 
 
