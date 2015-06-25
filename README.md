@@ -1,6 +1,6 @@
 # cmake-codecov
 
-[![Build Status](https://travis-ci.org/alehaa/cmake-codecov.svg?branch=master)](https://travis-ci.org/alehaa/cmake-codecov) [![codecov.io](http://codecov.io/github/alehaa/cmake-codecov/coverage.svg?branch=master)](http://codecov.io/github/alehaa/cmake-codecov?branch=master)
+[![Build Status](https://travis-ci.org/RWTH-ELP/CMake-codecov.svg?branch=master)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![codecov.io](http://codecov.io/github/RWTH-ELP/CMake-codecov/coverage.svg?branch=master)](http://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)
 
 CMake module to enable code coverage easily and generate coverage reports with CMake targets.
 
