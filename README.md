@@ -1,4 +1,4 @@
-# cmake-codecov
+# CMake-codecov
 
 [![Build Status](https://travis-ci.org/RWTH-ELP/CMake-codecov.svg?branch=master)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![codecov.io](http://codecov.io/github/RWTH-ELP/CMake-codecov/coverage.svg?branch=master)](http://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)
 
