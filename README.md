@@ -11,7 +11,7 @@ CMake module to enable code coverage easily and generate coverage reports with C
 To use [Findcodecov.cmake](cmake/Findcodecov.cmake), simply add this repository as git submodule into your own repository
 ```Shell
 mkdir externals
-git submodule add git://github.com/alehaa/cmake-codecov.git externals/cmake-codecov
+git submodule add git://github.com/RWTH-ELP/CMake-codecov.git externals/CMake-codecov
 ```
 and adding ```externals/cmake-codecov/cmake``` to your ```CMAKE_MODULE_PATH```
 ```CMake
