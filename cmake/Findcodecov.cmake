@@ -141,6 +141,12 @@ if (NOT COVERAGE_FOUND)
 endif()
 
 
+# Set CMake Policy CMP0051 to new. SOURCE property will include generator
+# expressions, so we can add coverage for object libraries on-the-fly.
+if (POLICY CMP0051)
+	cmake_policy(SET CMP0051 NEW)
+endif ()
+
 
 # Add coverage support for target ${TNAME} and register target for coverage
 # evaluation.
@@ -164,19 +170,6 @@ function(add_coverage_target TNAME)
 		APPEND_STRING
 		PROPERTY LINK_FLAGS " ${COVERAGE_LINKER_FLAGS}"
 	)
-
-
-	# Add check-targets for .gcda files. These should help to allow global
-	# evaluation targets, even if there are no .gcda files for all targets. If
-	# the .gcda file is not available, an empty one will be created, so gcov and
-	# lcov can continue execution.
-	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
-
-	get_target_property(TSOURCES ${TNAME} SOURCES)
-	set(BUFFER "")
-	foreach(FILE ${TSOURCES})
-		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
-	endforeach()
 
 
 	# add gcov evaluation

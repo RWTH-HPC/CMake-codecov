@@ -87,28 +87,36 @@ function (lcov_capture_initial_tgt TNAME)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
 	foreach(FILENAME ${TSOURCES})
-		# get the right path for filename
-		string(REPLACE ".." "__" FILE "${FILENAME}")
+		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
 
-		# get relative path for COMMENT
-		string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
+		# If expression was found, FILENAME is a generator-expression for an
+		# object library. Currently we found no way to call this function
+		# automatic for the referenced target, so it must be called in the
+		# directoryso of the object library definition.
+		if ("${_source}" STREQUAL "")
+			# get the right path for filename
+			string(REPLACE ".." "__" FILE "${FILENAME}")
 
-		# generate empty coverage files
-		set(OUTFILE "${TDIR}/${FILE}.info.init")
-		add_custom_command(OUTPUT ${OUTFILE}
-			COMMAND ${GENINFO_BIN}
-				--base-directory ${PROJECT_SOURCE_DIR}
-				--gcov-tool ${GCOV_BIN}
-				--initial
-				--output-filename ${OUTFILE}
-				--quiet
-				${TDIR}/${FILE}.gcno
-			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-			COMMENT "capturing initial coverage data for ${FILE_REL}"
-		)
+			# get relative path for COMMENT
+			string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
 
-		list(APPEND GENINFO_FILES ${OUTFILE})
-		list(APPEND LCOV_ARGS -a ${OUTFILE})
+			# generate empty coverage files
+			set(OUTFILE "${TDIR}/${FILE}.info.init")
+			add_custom_command(OUTPUT ${OUTFILE}
+				COMMAND ${GENINFO_BIN}
+					--base-directory ${PROJECT_SOURCE_DIR}
+					--gcov-tool ${GCOV_BIN}
+					--initial
+					--output-filename ${OUTFILE}
+					--quiet
+					${TDIR}/${FILE}.gcno
+				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
+				COMMENT "capturing initial coverage data for ${FILE_REL}"
+			)
+
+			list(APPEND GENINFO_FILES ${OUTFILE})
+			list(APPEND LCOV_ARGS -a ${OUTFILE})
+		endif ()
 	endforeach()
 
 	# create path for info files
@@ -200,30 +208,38 @@ function (lcov_capture_tgt TNAME)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
 	foreach(FILENAME ${TSOURCES})
-		# get the right path for file
-		string(REPLACE ".." "__" FILE "${FILENAME}")
+		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
 
-		# get relative path for COMMENT
-		string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
+		# If expression was found, FILENAME is a generator-expression for an
+		# object library. Currently we found no way to call this function
+		# automatic for the referenced target, so it must be called in the
+		# directoryso of the object library definition.
+		if ("${_source}" STREQUAL "")
+			# get the right path for file
+			string(REPLACE ".." "__" FILE "${FILENAME}")
 
-		# Generate coverage files. If no .gcda file was generated during
-		# execution, the empty coverage file will be used instead.
-		set(OUTFILE "${TDIR}/${FILE}.info")
-		add_custom_command(OUTPUT ${OUTFILE}
-			COMMAND test -f "${TDIR}/${FILE}.gcda"
-				&& ${GENINFO_BIN}
-					--base-directory ${PROJECT_SOURCE_DIR}
-					--gcov-tool ${GCOV_BIN}
-					--output-filename ${OUTFILE}
-					--quiet
-					${TDIR}/${FILE}.gcda
-				|| cp ${OUTFILE}.init ${OUTFILE}
-			DEPENDS ${TNAME} ${TNAME}-capture-init
-			COMMENT "capturing coverage data for ${FILE_REL}"
-		)
+			# get relative path for COMMENT
+			string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
 
-		list(APPEND GENINFO_FILES ${OUTFILE})
-		list(APPEND LCOV_ARGS -a ${OUTFILE})
+			# Generate coverage files. If no .gcda file was generated during
+			# execution, the empty coverage file will be used instead.
+			set(OUTFILE "${TDIR}/${FILE}.info")
+			add_custom_command(OUTPUT ${OUTFILE}
+				COMMAND test -f "${TDIR}/${FILE}.gcda"
+					&& ${GENINFO_BIN}
+						--base-directory ${PROJECT_SOURCE_DIR}
+						--gcov-tool ${GCOV_BIN}
+						--output-filename ${OUTFILE}
+						--quiet
+						${TDIR}/${FILE}.gcda
+					|| cp ${OUTFILE}.init ${OUTFILE}
+				DEPENDS ${TNAME} ${TNAME}-capture-init
+				COMMENT "capturing coverage data for ${FILE_REL}"
+			)
+
+			list(APPEND GENINFO_FILES ${OUTFILE})
+			list(APPEND LCOV_ARGS -a ${OUTFILE})
+		endif ()
 	endforeach()
 
 	# create path for info files

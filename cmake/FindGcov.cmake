@@ -58,19 +58,27 @@ function (add_gcov_target TNAME)
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(BUFFER "")
 	foreach(FILENAME ${TSOURCES})
-		# get the right path for file
-		string(REPLACE ".." "__" FILE "${FILENAME}")
+		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
 
-		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
+		# If expression was found, FILENAME is a generator-expression for an
+		# object library. Currently we found no way to call this function
+		# automatic for the referenced target, so it must be called in the
+		# directoryso of the object library definition.
+		if ("${_source}" STREQUAL "")
+			# get the right path for file
+			string(REPLACE ".." "__" FILE "${FILENAME}")
 
-		# call gcov
-		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
-			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-			WORKING_DIRECTORY ${FILE_PATH}
-		)
+			get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
 
-		list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+			# call gcov
+			add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
+				COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
+				WORKING_DIRECTORY ${FILE_PATH}
+			)
+
+			list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+		endif()
 	endforeach()
 
 	# add target for gcov evaluation of <TNAME>
