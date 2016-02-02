@@ -56,30 +56,55 @@ function (add_gcov_target TNAME)
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
 
 	get_target_property(TSOURCES ${TNAME} SOURCES)
-	set(BUFFER "")
-	foreach(FILENAME ${TSOURCES})
-		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
+	set(SOURCES "")
+	foreach(FILE ${TSOURCES})
+		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _file ${FILE})
+		# If expression was found, FILE is a generator-expression for an object
+		# library. Currently we found no way to call this function automatic for
+		# the referenced target, so it must be called in the directoryso of the
+		# object library definition.
 
-		# If expression was found, FILENAME is a generator-expression for an
-		# object library. Currently we found no way to call this function
-		# automatic for the referenced target, so it must be called in the
-		# directoryso of the object library definition.
-		if ("${_source}" STREQUAL "")
+		get_filename_component(FILE_EXT "${FILE}" EXT)
+		string(TOLOWER "${FILE_EXT}" FILE_EXT)
+		string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
+
+		get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+		set(IS_SOURCE 0)
+		foreach (LANG ${ENABLED_LANGUAGES})
+			list(FIND CMAKE_${LANG}_SOURCE_FILE_EXTENSIONS "${FILE_EXT}" TEMP)
+			if (NOT ${TEMP} EQUAL -1)
+				set(IS_SOURCE 1)
+			endif ()
+		endforeach()
+
+		if ("${_file}" STREQUAL "" AND ${IS_SOURCE} EQUAL 1)
+			string(REPLACE "${CMAKE_CURRENT_BINARY_DIR}/" "" FILE "${FILE}")
+			if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE}" AND
+			NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
+				file(RELATIVE_PATH FILE ${CMAKE_CURRENT_SOURCE_DIR} ${FILE})
+			endif()
+
 			# get the right path for file
-			string(REPLACE ".." "__" FILE "${FILENAME}")
+			string(REPLACE ".." "__" FILE "${FILE}")
 
-			get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
-
-			# call gcov
-			add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-				COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
-				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-				WORKING_DIRECTORY ${FILE_PATH}
-			)
-
-			list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+			list(APPEND SOURCES "${FILE}")
 		endif()
 	endforeach()
+
+	set(BUFFER "")
+	foreach(FILE ${SOURCES})
+		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
+
+		# call gcov
+		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
+			COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
+			WORKING_DIRECTORY ${FILE_PATH}
+		)
+
+		list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+	endforeach()
+
 
 	# add target for gcov evaluation of <TNAME>
 	add_custom_target(${TNAME}-gcov DEPENDS ${BUFFER})
