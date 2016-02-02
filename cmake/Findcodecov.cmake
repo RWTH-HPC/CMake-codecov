@@ -136,7 +136,9 @@ endforeach()
 
 if (_COVERAGE_REQUIRED_VARS)
 	include(FindPackageHandleStandardArgs)
-	find_package_handle_standard_args(codecov REQUIRED_VARS ${_COVERAGE_REQUIRED_VARS})
+	find_package_handle_standard_args(codecov
+		REQUIRED_VARS ${_COVERAGE_REQUIRED_VARS}
+		FOUND_VAR CODECOV_FOUND)
 	mark_as_advanced(${_COVERAGE_REQUIRED_VARS})
 	unset(_COVERAGE_REQUIRED_VARS)
 else()
@@ -147,7 +149,7 @@ endif()
 
 # Abort, if no coverage support by compiler. Disable coverage for further
 # processing, so add_coverage will ignore it.
-if (NOT codecov_FOUND)
+if (NOT CODECOV_FOUND)
 	set(ENABLE_COVERAGE OFF)
 	return()
 endif()
