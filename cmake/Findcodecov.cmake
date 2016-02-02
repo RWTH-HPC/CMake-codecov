@@ -107,35 +107,47 @@ endif ()
 # Check for coverage compiler flags in C and CXX, if one of those languages is
 # enabled. At least one language must pass this test to continue processing this
 # module.
-include(CheckCCompilerFlag)
-include(CheckCXXCompilerFlag)
-
-set(COVERAGE_FOUND false)
+set(_COVERAGE_REQUIRED_VARS)
 get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach (LANG ${LANGUAGES})
-	# check compiler for coverage support.
+	list(APPEND _COVERAGE_REQUIRED_VARS HAVE_COVERAGE_${LANG})
+
+	set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
 	if (${LANG} STREQUAL C)
-		set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
+		include(CheckCCompilerFlag)
 		check_c_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_C)
-		unset(CMAKE_REQUIRED_FLAGS)
 
 	elseif (${LANG} STREQUAL CXX)
-		set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
+		include(CheckCXXCompilerFlag)
 		check_cxx_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_CXX)
-		unset(CMAKE_REQUIRED_FLAGS)
-	endif()
 
-	# If compiler supports coverage, announce that we have found a compiler with
-	# coverage support.
-	if (HAVE_COVERAGE_${LANG})
-		set(COVERAGE_FOUND true)
-	endif ()
+	elseif (${LANG} STREQUAL Fortran)
+		include(CheckFortranCompilerFlag OPTIONAL RESULT_VARIABLE INCLUDED)
+		if (INCLUDED)
+			check_fortran_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_Fortran)
+		else ()
+			message("-- Performing Test HAVE_COVERAGE_Fortran")
+			message("-- Performing Test HAVE_COVERAGE_Fortran - Failed (Check not supported)")
+		endif ()
+	endif()
+	unset(CMAKE_REQUIRED_FLAGS)
 endforeach()
+
+
+if (_COVERAGE_REQUIRED_VARS)
+	include(FindPackageHandleStandardArgs)
+	find_package_handle_standard_args(codecov REQUIRED_VARS ${_COVERAGE_REQUIRED_VARS})
+	mark_as_advanced(${_COVERAGE_REQUIRED_VARS})
+	unset(_COVERAGE_REQUIRED_VARS)
+else()
+	message(SEND_ERROR "Codecoverage requires C, CXX or Fortran language to be enabled")
+	return()
+endif()
+
 
 # Abort, if no coverage support by compiler. Disable coverage for further
 # processing, so add_coverage will ignore it.
-if (NOT COVERAGE_FOUND)
-	message(WARNING "No compiler supports coverage.")
+if (NOT codecov_FOUND)
 	set(ENABLE_COVERAGE OFF)
 	return()
 endif()
