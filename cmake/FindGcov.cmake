@@ -79,8 +79,8 @@ function (add_gcov_target TNAME)
 
 		if ("${_file}" STREQUAL "" AND ${IS_SOURCE} EQUAL 1)
 			string(REPLACE "${CMAKE_CURRENT_BINARY_DIR}/" "" FILE "${FILE}")
-			if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${FILE}" AND
-			NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/${FILE}")
+
+			if(IS_ABSOLUTE ${FILE})
 				file(RELATIVE_PATH FILE ${CMAKE_CURRENT_SOURCE_DIR} ${FILE})
 			endif()
 
