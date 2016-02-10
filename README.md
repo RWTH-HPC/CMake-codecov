@@ -20,6 +20,12 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/cmake-codecov/cmake" ${CMAK
 
 If you don't use git or dislike submodules you can copy the [Findcodecov.cmake](cmake/Findcodecov.cmake), [FindGcov.cmake](cmake/FindGcov.cmake) and [FindLcov.cmake](cmake/FindLcov.cmake) files into your repository. *Be careful when there are version updates of this repository!*
 
+Next you have to include the codecov package. This can be done in your root CMake file, or in the file were your targets will be defined:
+```CMake
+# enable code coverage
+find_package(codecov)
+```
+
 For coverage evaluation you have to add ```coverage_evaluate()``` after all other targets have been defined. A good place for this is your root CMakeLists.txt in the last lines after you included your sub-directories and added targets.
 
 
