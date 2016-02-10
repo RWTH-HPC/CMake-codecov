@@ -84,6 +84,6 @@ Lcov is a console program to evaluate the generate coverage data, but instead of
 
 ## Copyright
 
-Copyright (c) 2015 RWTH Aachen University, Federal Republic of Germany.
+Copyright (c) 2015-2016 RWTH Aachen University, Federal Republic of Germany.
 
 Written by [Alexander Haase](alexander.haase@rwth-aachen.de).

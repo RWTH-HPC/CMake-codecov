@@ -17,7 +17,7 @@
  *
  *
  * Copyright (c)
- *  2015 RWTH Aachen University, Federal Republic of Germany
+ *  2015-2016 RWTH Aachen University, Federal Republic of Germany
  *
  * Written by Alexander Haase, alexander.haase@rwth-aachen.de
  */
