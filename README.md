@@ -82,8 +82,21 @@ Lcov is a console program to evaluate the generate coverage data, but instead of
 |```lcov```|Generate a *single* report for all targets. This target will call ```lcov-geninfo``` before. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/all_targets```.|
 
 
-## Copyright
+## Contribute
+
+Anyone is welcome to contribute. Simply fork this repository, make your changes **in an own branch** and create a pull-request for your change. Please do only one change per pull-request.
+
+You found a bug? Please fill out an issue and include any data to reproduce the bug.
+
+#### Contributors
+
+[Alexander Haase](https://github.com/alehaa)
+
+
+## License
+
+CMake-codecov is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,but **WITHOUT ANY WARRANTY**; without even the implied warranty of **MERCHANTABILITY** or **FITNESS FOR A PARTICULAR PURPOSE**. See the GNU General Public License for more details. A Copy of the GPL can be found in the [LICENSE](LICENSE) file.
 
 Copyright (c) 2015-2016 RWTH Aachen University, Federal Republic of Germany.
-
-Written by [Alexander Haase](alexander.haase@rwth-aachen.de).
