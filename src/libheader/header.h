@@ -25,18 +25,8 @@
 
 #include <stdio.h>
 
-#include "foo.h"
-#include <header.h>
-
-int
-main (int argc, char** argv)
+void
+header_func ()
 {
-	if (*argv[1] == '1')
-		printf("%d\n", foo());
-	else if (*argv[1] == '2')
-		printf("%d\n", bar());
-	else if (*argv[1] == '3')
-		header_func();
-
-	return 0;
+	printf("Hello World\n");
 }

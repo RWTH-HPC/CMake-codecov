@@ -23,13 +23,5 @@
 #
 
 
-include_directories(../libfoo)
-add_executable(bar bar.c)
-target_link_libraries(bar foo header)
-
-add_test(test1 ${CMAKE_CURRENT_BINARY_DIR}/bar 1)
-add_test(test2 ${CMAKE_CURRENT_BINARY_DIR}/bar 2)
-add_test(test3 ${CMAKE_CURRENT_BINARY_DIR}/bar 3)
-
-find_package(codecov)
-add_coverage(bar)
+add_library(header INTERFACE)
+target_include_directories(header INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
