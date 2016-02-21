@@ -30,6 +30,7 @@ set(LCOV_DATA_PATH "${CMAKE_BINARY_DIR}/lcov/data")
 set(LCOV_DATA_PATH_INIT "${LCOV_DATA_PATH}/init")
 set(LCOV_DATA_PATH_CAPTURE "${LCOV_DATA_PATH}/capture")
 set(LCOV_HTML_PATH "${CMAKE_BINARY_DIR}/lcov/html")
+set(LCOV_EXTERN_FLAG "--no-extern")
 
 
 
@@ -47,6 +48,14 @@ include(FindPackageHandleStandardArgs)
 
 # Search for required lcov binaries.
 find_program(LCOV_BIN lcov)
+if (NOT LCOV_BIN STREQUAL "")
+	execute_process(COMMAND ${LCOV_BIN} ERROR_VARIABLE LCOV_ERRSTR)
+	string(REGEX MATCH "Unknown option: no-extern" LCOV_RES "${LCOV_ERRSTR}")
+	if (NOT "${LCOV_RES}" STREQUAL "")
+		set(LCOV_EXTERN_FLAG "")
+	endif ()
+endif ()
+
 find_program(GENINFO_BIN geninfo)
 find_program(GENHTML_BIN genhtml)
 find_package_handle_standard_args(lcov
@@ -129,7 +138,7 @@ function (lcov_capture_initial_tgt TNAME)
 		COMMAND ${LCOV_BIN}
 			${LCOV_ARGS}
 			--base-directory ${PROJECT_SOURCE_DIR}
-			--no-extern
+			${LCOV_EXTERN_FLAG}
 			--gcov-tool ${GCOV_BIN}
 			--initial
 			--output-file ${OUTFILE}
@@ -175,7 +184,7 @@ function (lcov_capture_initial)
 		COMMAND ${LCOV_BIN}
 			${LCOV_ARGS}
 			--base-directory ${PROJECT_SOURCE_DIR}
-			--no-extern
+			${LCOV_EXTERN_FLAG}
 			--gcov-tool ${GCOV_BIN}
 			--output-file ${OUTFILE}
 			--quiet
@@ -318,7 +327,7 @@ function (lcov_capture)
 		COMMAND ${LCOV_BIN}
 			${LCOV_ARGS}
 			--base-directory ${PROJECT_SOURCE_DIR}
-			--no-extern
+			${LCOV_EXTERN_FLAG}
 			--gcov-tool ${GCOV_BIN}
 			--output-file ${OUTFILE}
 			--quiet
