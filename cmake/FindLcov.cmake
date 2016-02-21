@@ -374,13 +374,18 @@ endfunction (add_lcov_target)
 # the targets you'd like to have in your report or lcov-geninfo for generating
 # info files for all targets before calling lcov-genhtml.
 file(MAKE_DIRECTORY ${LCOV_HTML_PATH}/selected_targets)
-add_custom_target(lcov-genhtml
-	COMMAND ${GENHTML_BIN}
-		--quiet
-		--output-directory ${LCOV_HTML_PATH}/selected_targets
-		--title \"${CMAKE_PROJECT_NAME} - targets `find ${LCOV_DATA_PATH_CAPTURE} -name \"*.info\" ! -name \"all_targets.info\" -exec basename {} .info \\\;`\"
-		--prefix ${PROJECT_SOURCE_DIR}
-		--sort
-		${GENHTML_CPPFILT_FLAG}
-		`find ${LCOV_DATA_PATH_CAPTURE} -name \"*.info\" ! -name \"all_targets.info\"`
-)
+if (NOT TARGET lcov-genhtml)
+	add_custom_target(lcov-genhtml
+		COMMAND ${GENHTML_BIN}
+			--quiet
+			--output-directory ${LCOV_HTML_PATH}/selected_targets
+			--title \"${CMAKE_PROJECT_NAME} - targets  `find
+				${LCOV_DATA_PATH_CAPTURE} -name \"*.info\" ! -name
+				\"all_targets.info\" -exec basename {} .info \\\;`\"
+			--prefix ${PROJECT_SOURCE_DIR}
+			--sort
+			${GENHTML_CPPFILT_FLAG}
+			`find ${LCOV_DATA_PATH_CAPTURE} -name \"*.info\" ! -name
+				\"all_targets.info\"`
+	)
+endif (NOT TARGET lcov-genhtml)
