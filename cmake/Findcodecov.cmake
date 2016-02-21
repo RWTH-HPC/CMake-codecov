@@ -23,44 +23,18 @@
 #
 
 
-# Header guard.
-# This module must only be included once (via find_package or include). If it
-# will be included more than once, there may be problems. The user should not be
-# forced to include it in top directory, so this header guard will prevent them
-# that this module is only loaded once, even if they include this module in
-# every CMake file.
-if (DEFINED COVERAGE_HEADER_GUARD)
-	return()
-endif ()
-set(COVERAGE_HEADER_GUARD true)
-
-
-
-#
-# configuration
-#
-set(COVERAGE_CFLAGS "-g -O0 --coverage")
-set(COVERAGE_LINKER_FLAGS "--coverage")
-
-
-
-#
-# options
-#
-
 # Add an option to choose, if coverage should be enabled or not. If enabled
 # marked targets will be build with coverage support and appropriate targets
 # will be added. If disabled coverage will be ignored for *ALL* targets.
 option(ENABLE_COVERAGE "Enable coverage build." OFF)
 
-# Add an option to choose, if coverage should be enabled for all targets, even
-# those which are not explictly marked as coverage targets. If disabled, only
-# targets added by add_coverage will be marked for coverage build. This option
-# is only available, if coverage was enabled.
-if (ENABLE_COVERAGE)
-	option(ENABLE_COVERAGE_ALL "Enable coverage build for all targets." OFF)
-endif ()
+set(COVERAGE_FLAG_CANDIDATES
+	# gcc and clang
+	"-fprofile-arcs -ftest-coverage"
 
+	# gcc and clang fallback
+	"-O0 --coverage"
+)
 
 
 # Add coverage support for target ${TNAME} and register target for coverage
@@ -69,9 +43,8 @@ endif ()
 #
 # Note: This function is only a wrapper to define this function always, even if
 #   coverage is not supported by the compiler or disabled. This function must
-#   stay here, because the module will be exited, if there is no coverage
+#   be defined here, because the module will be exited, if there is no coverage
 #   support by the compiler or it is disabled by the user.
-#
 function (add_coverage TNAME)
 	# only add coverage for target, if coverage is support and enabled.
 	if (ENABLE_COVERAGE)
@@ -80,13 +53,14 @@ function (add_coverage TNAME)
 endfunction (add_coverage)
 
 
-
 # Add global target to gather coverage information after all targets have been
 # added. Other evaluation functions could be added here, after checks for the
 # specific module have been passed.
 #
-# Note: This function must stay here, because the module will be exited, if
-# there is no coverage support by the compiler or it is disabled by the user.
+# Note: This function is only a wrapper to define this function always, even if
+#   coverage is not supported by the compiler or disabled. This function must
+#   be defined here, because the module will be exited, if there is no coverage
+#   support by the compiler or it is disabled by the user.
 function (coverage_evaluate)
 	# add lcov evaluation
 	if (LCOV_FOUND)
@@ -104,85 +78,129 @@ endif ()
 
 
 
-# Check for coverage compiler flags in C and CXX, if one of those languages is
-# enabled. At least one language must pass this test to continue processing this
-# module.
-set(_COVERAGE_REQUIRED_VARS)
-get_property(LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
-foreach (LANG ${LANGUAGES})
-	list(APPEND _COVERAGE_REQUIRED_VARS HAVE_COVERAGE_${LANG})
 
-	set(CMAKE_REQUIRED_FLAGS "${COVERAGE_LINKER_FLAGS}")
-	if (${LANG} STREQUAL C)
-		include(CheckCCompilerFlag)
-		check_c_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_C)
+# Find the reuired flags foreach language.
+set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
+set(CMAKE_REQUIRED_QUIET ${codecov_FIND_QUIETLY})
 
-	elseif (${LANG} STREQUAL CXX)
-		include(CheckCXXCompilerFlag)
-		check_cxx_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_CXX)
+set(_COVERAGE_ENABLED_LANGUAGES)
 
-	elseif (${LANG} STREQUAL Fortran)
-		include(CheckFortranCompilerFlag OPTIONAL RESULT_VARIABLE INCLUDED)
-		if (INCLUDED)
-			check_fortran_compiler_flag("${COVERAGE_CFLAGS}" HAVE_COVERAGE_Fortran)
-		else ()
-			message("-- Performing Test HAVE_COVERAGE_Fortran")
-			message("-- Performing Test HAVE_COVERAGE_Fortran - Failed (Check not supported)")
+get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+foreach (LANG ${ENABLED_LANGUAGES})
+	# If flags for this compiler were already found, do not try to find them
+	# again.
+	if (NOT COVERAGE_${LANG}_FLAGS)
+		foreach (FLAG ${COVERAGE_FLAG_CANDIDATES})
+			if(NOT CMAKE_REQUIRED_QUIET)
+				message(STATUS "Try code coverage ${LANG} flag = [${FLAG}]")
+			endif()
+
+			set(CMAKE_REQUIRED_FLAGS "${FLAG}")
+			unset(COVERAGE_FLAG_DETECTED CACHE)
+
+			if (${LANG} STREQUAL "C")
+				include(CheckCCompilerFlag)
+				check_c_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
+
+			elseif (${LANG} STREQUAL "CXX")
+				include(CheckCXXCompilerFlag)
+				check_cxx_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
+
+			elseif (${LANG} STREQUAL "Fortran")
+				# CheckFortranCompilerFlag was introduced in CMake 3.x. To be
+				# compatible with older Cmake versions, we will check if this
+				# module is present before we use it. Otherwise we will define
+				# Fortran coverage support as not available.
+				include(CheckFortranCompilerFlag OPTIONAL
+					RESULT_VARIABLE INCLUDED)
+				if (INCLUDED)
+					check_fortran_compiler_flag("${COVERAGE_CFLAGS}"
+						COVERAGE_FLAG_DETECTED)
+				elseif (NOT CMAKE_REQUIRED_QUIET)
+					message("-- Performing Test HAVE_COVERAGE_Fortran")
+					message("-- Performing Test HAVE_COVERAGE_Fortran - Failed "
+						"(Check not supported)")
+				endif ()
+			endif()
+
+			if (COVERAGE_FLAG_DETECTED)
+				set(COVERAGE_${LANG}_FLAGS "${FLAG}"
+					CACHE STRING "${LANG} compiler flags for code coverage.")
+				mark_as_advanced(COVERAGE_${LANG}_FLAGS)
+				list(APPEND _COVERAGE_ENABLED_LANGUAGES ${LANG})
+				break()
+			endif ()
+		endforeach ()
+	endif ()
+endforeach ()
+
+set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
+
+
+
+
+# Helper function to get the language of a source file.
+function (lang_of_source FILENAME LANGUAGE_FLAG)
+	get_filename_component(FILE_EXT "${FILENAME}" EXT)
+	string(TOLOWER "${FILE_EXT}" FILE_EXT)
+	string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
+
+	get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+	foreach (LANG ${ENABLED_LANGUAGES})
+		list(FIND CMAKE_${LANG}_SOURCE_FILE_EXTENSIONS "${FILE_EXT}" TEMP)
+		if (NOT ${TEMP} EQUAL -1)
+			set(${LANGUAGE_FLAG} "${LANG}" PARENT_SCOPE)
+			return()
 		endif ()
-	endif()
-	unset(CMAKE_REQUIRED_FLAGS)
-endforeach()
-
-
-if (_COVERAGE_REQUIRED_VARS)
-	include(FindPackageHandleStandardArgs)
-	find_package_handle_standard_args(codecov
-		REQUIRED_VARS ${_COVERAGE_REQUIRED_VARS}
-		FOUND_VAR CODECOV_FOUND)
-	mark_as_advanced(${_COVERAGE_REQUIRED_VARS})
-	unset(_COVERAGE_REQUIRED_VARS)
-else()
-	message(SEND_ERROR "Codecoverage requires C, CXX or Fortran language to be enabled")
-	return()
-endif()
-
-
-# Abort, if no coverage support by compiler. Disable coverage for further
-# processing, so add_coverage will ignore it.
-if (NOT CODECOV_FOUND)
-	set(ENABLE_COVERAGE OFF)
-	return()
-endif()
-
-
-# Set CMake Policy CMP0051 to new. SOURCE property will include generator
-# expressions, so we can add coverage for object libraries on-the-fly.
-if (POLICY CMP0051)
-	cmake_policy(SET CMP0051 NEW)
-endif ()
+	endforeach()
+endfunction ()
 
 
 # Add coverage support for target ${TNAME} and register target for coverage
 # evaluation.
-#
 function(add_coverage_target TNAME)
-	# If coverage is already enabled for this target, we can skip the execution
-	# of this function.
-	if (TARGET ${TNAME}-coverage)
-		return()
-	endif ()
+	# Check if all sources for target use the same compiler. If a target uses
+	# e.g. C and Fortran mixed and uses different compilers (e.g. clang and
+	# gfortran) this can trigger huge problems, because different compilers may
+	# use different implementations for code coverage.
+	get_target_property(TSOURCES ${TNAME} SOURCES)
+	set(TARGET_LANGUAGES "")
+	foreach (FILE ${TSOURCES})
+		# If expression was found, FILE is a generator-expression for an object
+		# library. Object libraries will be ignored.
+		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _file ${FILE})
+		if ("${_file}" STREQUAL "")
+			lang_of_source(${FILE} LANG)
+			list(APPEND TARGET_LANGUAGES ${LANG})
+		endif ()
+	endforeach ()
+	list(REMOVE_DUPLICATES TARGET_LANGUAGES)
 
-	# create coverage target for this target
-	add_custom_target(${TNAME}-coverage DEPENDS ${TNAME})
+	set(TARGET_LANG "")
+	set(TEMP_COMPILER "")
+	foreach (LANG ${TARGET_LANGUAGES})
+		if (("${TEMP_COMPILER}" STREQUAL "") OR
+			("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "${TEMP_COMPILER}"))
+			set(TEMP_COMPILER "${CMAKE_${LANG}_COMPILER_ID}")
+			set(TARGET_LANG ${LANG})
+		else ()
+			message(AUTHOR_WARNING "Coverage disabled for target ${TNAME} "
+				"because it will be compiled by different compilers. "
+				"Please set compiler- and linker-flags manual for this target."
+			)
+			return()
+		endif ()
+	endforeach ()
+
 
 	# enable coverage for target
 	set_property(TARGET ${TNAME}
 		APPEND_STRING
-		PROPERTY COMPILE_FLAGS " ${COVERAGE_CFLAGS}"
+		PROPERTY COMPILE_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
 	)
 	set_property(TARGET ${TNAME}
 		APPEND_STRING
-		PROPERTY LINK_FLAGS " ${COVERAGE_LINKER_FLAGS}"
+		PROPERTY LINK_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
 	)
 
 
@@ -198,59 +216,9 @@ function(add_coverage_target TNAME)
 endfunction(add_coverage_target)
 
 
-# If ENABLE_COVERAGE_ALL is enabled, overload add_executable and add_library
-# functions, to add coverage support for *ALL* targets. The functions will call
-# the overloaded functions first and then add_coverage.
-if (ENABLE_COVERAGE_ALL)
-	function(add_executable ARGV)
-		# add executable
-		_add_executable(${ARGV})
-
-		# check if target is supported for code coverage
-		get_target_property(TSOURCES ${ARGV0} SOURCES)
-		foreach (FILE ${TSOURCES})
-			get_source_file_property(SLANG ${FILE} LANGUAGE)
-			if ((NOT ${SLANG} STREQUAL "C") AND (NOT ${SLANG} STREQUAL "CXX"))
-				# Target has source files that are not supported for code
-				# coverage. Do not add coverage for this target and print a
-				# warning.
-				message("-- Code coverage not supported for target ${ARGV0}")
-				return()
-			endif()
-		endforeach ()
-
-		# add coverage
-		add_coverage(${ARGV0})
-	endfunction(add_executable)
-
-	function(add_library ARGV)
-		# add library
-		_add_library(${ARGV})
-
-		# check if target is supported for code coverage
-		get_target_property(TSOURCES ${ARGV0} SOURCES)
-		foreach (FILE ${TSOURCES})
-			get_source_file_property(SLANG ${FILE} LANGUAGE)
-			if ((NOT ${SLANG} STREQUAL "C") AND (NOT ${SLANG} STREQUAL "CXX"))
-				# Target has source files that are not supported for code
-				# coverage. Do not add coverage for this target and print a
-				# warning.
-				message("-- Code coverage not supported for target ${ARGV0}")
-				return()
-			endif()
-		endforeach ()
-
-		# add coverage
-		add_coverage(${ARGV0})
-	endfunction(add_library)
-endif ()
-
-
-
 
 
 # Include modules for parsing the collected data and output it in a readable
 # format (like gcov and lcov).
-#
 find_package(Gcov)
 find_package(Lcov)
