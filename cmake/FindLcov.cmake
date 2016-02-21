@@ -23,14 +23,12 @@
 #
 
 
-#
 # configuration
-#
 set(LCOV_DATA_PATH "${CMAKE_BINARY_DIR}/lcov/data")
 set(LCOV_DATA_PATH_INIT "${LCOV_DATA_PATH}/init")
 set(LCOV_DATA_PATH_CAPTURE "${LCOV_DATA_PATH}/capture")
 set(LCOV_HTML_PATH "${CMAKE_BINARY_DIR}/lcov/html")
-set(LCOV_EXTERN_FLAG "--no-external")
+
 
 
 
@@ -48,27 +46,29 @@ include(FindPackageHandleStandardArgs)
 
 # Search for required lcov binaries.
 find_program(LCOV_BIN lcov)
-if (NOT LCOV_BIN STREQUAL "")
-	execute_process(COMMAND ${LCOV_BIN} --help OUTPUT_VARIABLE LCOV_HELP)
-	string(REGEX MATCH "external" LCOV_RES "${LCOV_HELP}")
-	if ("${LCOV_RES}" STREQUAL "")
-		set(LCOV_EXTERN_FLAG "")
-	endif ()
-endif ()
-
 find_program(GENINFO_BIN geninfo)
 find_program(GENHTML_BIN genhtml)
 find_package_handle_standard_args(lcov
 	REQUIRED_VARS LCOV_BIN GENINFO_BIN GENHTML_BIN
 )
 
-# enable genhtml C++ demangeling, if c++filt is found
+# enable genhtml C++ demangeling, if c++filt is found.
 set(GENHTML_CPPFILT_FLAG "")
 find_program(CPPFILT_BIN c++filt)
 if (NOT CPPFILT_BIN STREQUAL "")
 	set(GENHTML_CPPFILT_FLAG "--demangle-cpp")
 endif (NOT CPPFILT_BIN STREQUAL "")
 
+# enable no-external flag for lcov, if available.
+if (NOT LCOV_BIN STREQUAL "")
+	execute_process(COMMAND ${LCOV_BIN} --help OUTPUT_VARIABLE LCOV_HELP)
+	string(REGEX MATCH "external" LCOV_RES "${LCOV_HELP}")
+	if ("${LCOV_RES}" STREQUAL "")
+		set(LCOV_EXTERN_FLAG "")
+	else ()
+		set(LCOV_EXTERN_FLAG "--no-external")
+	endif ()
+endif ()
 
 # If Lcov was not found, exit module now.
 if (NOT LCOV_FOUND)
@@ -95,20 +95,9 @@ function (lcov_capture_initial_tgt TNAME)
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
-	foreach(FILENAME ${TSOURCES})
-		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
-
-		# If expression was found, FILENAME is a generator-expression for an
-		# object library. Currently we found no way to call this function
-		# automatic for the referenced target, so it must be called in the
-		# directoryso of the object library definition.
-		if ("${_source}" STREQUAL "")
-			# get the right path for filename
-			string(REPLACE ".." "__" FILE "${FILENAME}")
-
-			# get relative path for COMMENT
-			string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
-
+	foreach(FILE ${TSOURCES})
+		codecov_path_of_source(${FILE} FILE)
+		if (NOT "${FILE}" STREQUAL "")
 			# generate empty coverage files
 			set(OUTFILE "${TDIR}/${FILE}.info.init")
 			add_custom_command(OUTPUT ${OUTFILE}
@@ -120,7 +109,7 @@ function (lcov_capture_initial_tgt TNAME)
 					--quiet
 					${TDIR}/${FILE}.gcno
 				DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-				COMMENT "capturing initial coverage data for ${FILE_REL}"
+				COMMENT "capturing initial coverage data for ${FILE}"
 			)
 
 			list(APPEND GENINFO_FILES ${OUTFILE})
@@ -216,20 +205,9 @@ function (lcov_capture_tgt TNAME)
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(GENINFO_FILES "")
 	set(LCOV_ARGS "")
-	foreach(FILENAME ${TSOURCES})
-		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILENAME})
-
-		# If expression was found, FILENAME is a generator-expression for an
-		# object library. Currently we found no way to call this function
-		# automatic for the referenced target, so it must be called in the
-		# directoryso of the object library definition.
-		if ("${_source}" STREQUAL "")
-			# get the right path for file
-			string(REPLACE ".." "__" FILE "${FILENAME}")
-
-			# get relative path for COMMENT
-			string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${TDIR}/${FILE}")
-
+	foreach(FILE ${TSOURCES})
+		codecov_path_of_source(${FILE} FILE)
+		if (NOT "${FILE}" STREQUAL "")
 			# Generate coverage files. If no .gcda file was generated during
 			# execution, the empty coverage file will be used instead.
 			set(OUTFILE "${TDIR}/${FILE}.info")
@@ -243,7 +221,7 @@ function (lcov_capture_tgt TNAME)
 						${TDIR}/${FILE}.gcda
 					|| cp ${OUTFILE}.init ${OUTFILE}
 				DEPENDS ${TNAME} ${TNAME}-capture-init
-				COMMENT "capturing coverage data for ${FILE_REL}"
+				COMMENT "capturing coverage data for ${FILE}"
 			)
 
 			list(APPEND GENINFO_FILES ${OUTFILE})

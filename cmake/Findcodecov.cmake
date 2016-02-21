@@ -140,8 +140,8 @@ set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 
 
 # Helper function to get the language of a source file.
-function (lang_of_source FILENAME LANGUAGE_FLAG)
-	get_filename_component(FILE_EXT "${FILENAME}" EXT)
+function (codecov_lang_of_source FILE RETURN_VAR)
+	get_filename_component(FILE_EXT "${FILE}" EXT)
 	string(TOLOWER "${FILE_EXT}" FILE_EXT)
 	string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
 
@@ -149,11 +149,44 @@ function (lang_of_source FILENAME LANGUAGE_FLAG)
 	foreach (LANG ${ENABLED_LANGUAGES})
 		list(FIND CMAKE_${LANG}_SOURCE_FILE_EXTENSIONS "${FILE_EXT}" TEMP)
 		if (NOT ${TEMP} EQUAL -1)
-			set(${LANGUAGE_FLAG} "${LANG}" PARENT_SCOPE)
+			set(${RETURN_VAR} "${LANG}" PARENT_SCOPE)
 			return()
 		endif ()
 	endforeach()
+
+	# SOURCEFILE
+	set(${RETURN_VAR} "" PARENT_SCOPE)
 endfunction ()
+
+
+# Helper function to get the relative path of the source file destination path.
+# This path is needed by FindGcov and FindLcov cmake files to locate the
+# captured data.
+function (codecov_path_of_source FILE RETURN_VAR)
+	string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _source ${FILE})
+
+	# If expression was found, SOURCEFILE is a generator-expression for an
+	# object library. Currently we found no way to call this function automatic
+	# for the referenced target, so it must be called in the directoryso of the
+	# object library definition.
+	if (NOT "${_source}" STREQUAL "")
+		set(${RETURN_VAR} "" PARENT_SCOPE)
+		return()
+	endif ()
+
+
+	string(REPLACE "${CMAKE_CURRENT_BINARY_DIR}/" "" FILE "${FILE}")
+	if(IS_ABSOLUTE ${FILE})
+		file(RELATIVE_PATH FILE ${CMAKE_CURRENT_SOURCE_DIR} ${FILE})
+	endif()
+
+	# get the right path for file
+	string(REPLACE ".." "__" PATH "${FILE}")
+
+	set(${RETURN_VAR} "${PATH}" PARENT_SCOPE)
+endfunction()
+
+
 
 
 # Add coverage support for target ${TNAME} and register target for coverage
@@ -170,7 +203,7 @@ function(add_coverage_target TNAME)
 		# library. Object libraries will be ignored.
 		string(REGEX MATCH "TARGET_OBJECTS:([^ >]+)" _file ${FILE})
 		if ("${_file}" STREQUAL "")
-			lang_of_source(${FILE} LANG)
+			codecov_lang_of_source(${FILE} LANG)
 			list(APPEND TARGET_LANGUAGES ${LANG})
 		endif ()
 	endforeach ()
