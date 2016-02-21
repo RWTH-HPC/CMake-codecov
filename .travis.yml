@@ -1,20 +1,44 @@
 language: c
 
-compiler:
-  - gcc
-  - clang
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+    - os: linux
+      compiler: clang
+
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: gcc
+    - os: linux
+      dist: trusty
+      sudo: required
+      compiler: clang
+
+    - os: osx
+      compiler: gcc
+    - os: osx
+      compiler: clang
+
+
+addons:
+  apt:
+    sources:
+      - kalakris-cmake
+    packages:
+      - cmake
+      - lcov
 
 before_install:
-  - sudo add-apt-repository --yes ppa:kalakris/cmake
-  - sudo apt-get update -qq
-  - sudo apt-get install cmake
+  - pip install --user codecov
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update --quiet ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install lcov; fi
+
 
 script:
   - mkdir build && cd build
-  - cmake .. -DENABLE_COVERAGE=On
-  - make
-  - make test
+  - cmake .. -DENABLE_COVERAGE=On && make && make test && make gcov && mage lcov
 
 after_success:
-  - make gcov
-  - bash <(curl -s https://codecov.io/bash)
+  - codecov
