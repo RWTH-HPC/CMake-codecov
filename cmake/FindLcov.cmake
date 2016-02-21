@@ -30,7 +30,7 @@ set(LCOV_DATA_PATH "${CMAKE_BINARY_DIR}/lcov/data")
 set(LCOV_DATA_PATH_INIT "${LCOV_DATA_PATH}/init")
 set(LCOV_DATA_PATH_CAPTURE "${LCOV_DATA_PATH}/capture")
 set(LCOV_HTML_PATH "${CMAKE_BINARY_DIR}/lcov/html")
-set(LCOV_EXTERN_FLAG "--no-extern")
+set(LCOV_EXTERN_FLAG "--no-external")
 
 
 
@@ -49,8 +49,8 @@ include(FindPackageHandleStandardArgs)
 # Search for required lcov binaries.
 find_program(LCOV_BIN lcov)
 if (NOT LCOV_BIN STREQUAL "")
-	execute_process(COMMAND ${LCOV_BIN} ERROR_VARIABLE LCOV_ERRSTR)
-	string(REGEX MATCH "Unknown option: no-extern" LCOV_RES "${LCOV_ERRSTR}")
+	execute_process(COMMAND ${LCOV_BIN} --help OUTPUT_VARIABLE LCOV_HELP)
+	string(REGEX MATCH "external" LCOV_RES "${LCOV_ERRSTR}")
 	if (NOT "${LCOV_RES}" STREQUAL "")
 		set(LCOV_EXTERN_FLAG "")
 	endif ()
