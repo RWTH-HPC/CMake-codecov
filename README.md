@@ -1,6 +1,7 @@
 # CMake-codecov
 
-[![Build Status](https://travis-ci.org/RWTH-ELP/CMake-codecov.svg?branch=master)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![codecov.io](http://codecov.io/github/RWTH-ELP/CMake-codecov/coverage.svg?branch=master)](http://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)
+[![Travis](https://img.shields.io/travis/RWTH-ELP/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![Codecov](https://img.shields.io/codecov/c/github/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)  [![](https://img.shields.io/github/issues-raw/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://github.com/RWTH-ELP/CMake-codecov/issues)
+[![GPL license](http://img.shields.io/badge/license-GPL-blue.svg?style=flat-square)](http://www.gnu.org/licenses/)
 
 CMake module to enable code coverage easily and generate coverage reports with CMake targets.
 
@@ -35,6 +36,11 @@ To enable coverage support in general, you have to enable ```ENABLE_COVERAGE``` 
 
 If coverage is supported by your compiler, the specified targets will be build with coverage support. If your compiler has no coverage capabilities (I asume intel compiler doesn't) you'll get a warning but CMake will continue processing and coverage will simply just be ignored.
 
+#### Compiler issues
+
+Different compilers may be using different implementations for code coverage. If you'll try to cover targets with C and Fortran code but don't use gcc & gfortran but clang & gfortran, this will cause linking problems. To avoid this, such problems will be detected and coverage will be disabled for such targets.
+
+Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. E.g. Travis CI trusty builds may cause such issues. To avoid this, you must install an older gcc version, too, and make the older gcov binary to your default gcov. For an example take a look at the [Travis CI configuration file](.travis.yml).
 
 ### Build targets with coverage support
 
