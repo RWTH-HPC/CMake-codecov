@@ -64,6 +64,7 @@ endfunction (add_coverage)
 function (coverage_evaluate)
 	# add lcov evaluation
 	if (LCOV_FOUND)
+		lcov_capture_initial()
 		lcov_capture()
 	endif (LCOV_FOUND)
 endfunction ()
