@@ -11,10 +11,12 @@ matrix:
       dist: trusty
       sudo: required
       compiler: gcc
+      env: DIST=trusty
     - os: linux
       dist: trusty
       sudo: required
       compiler: clang
+      env: DIST=trusty
 
     - os: osx
       compiler: gcc
@@ -34,6 +36,7 @@ before_install:
   - pip install --user codecov
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update --quiet ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install lcov; fi
+  - if [[ "$DIST" == "trusty" -a "$CC" == "clang" ]]; then sudo apt-get install gcc-4.6; fi
 
 
 script:
