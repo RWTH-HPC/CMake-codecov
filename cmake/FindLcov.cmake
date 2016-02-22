@@ -111,6 +111,7 @@ endfunction ()
 # used to gather even empty report data.
 if (NOT TARGET lcov-capture-init)
 	add_custom_target(lcov-capture-init)
+	set(LCOV_CAPTURE_INIT_FILES "" CACHE INTERNAL "")
 endif (NOT TARGET lcov-capture-init)
 
 
@@ -148,7 +149,9 @@ function (lcov_capture_initial_tgt TNAME)
 
 	# add geninfo file generation to global lcov-geninfo target
 	add_dependencies(lcov-capture-init ${TNAME}-capture-init)
-	set_property(TARGET lcov-capture-init APPEND PROPERTY SOURCES ${OUTFILE})
+	set(LCOV_CAPTURE_INIT_FILES "${LCOV_CAPTURE_INIT_FILES}"
+		"${OUTFILE}" CACHE INTERNAL ""
+	)
 endfunction (lcov_capture_initial_tgt)
 
 
@@ -156,14 +159,9 @@ endfunction (lcov_capture_initial_tgt)
 # called after all other CMake functions in the root CMakeLists.txt file, to get
 # a full list of all targets that generate coverage data.
 function (lcov_capture_initial)
-	# Get source files of lcov-capture-init and clear sources to avoid error
-	# messages.
-	get_target_property(TSOURCES lcov-capture-init SOURCES)
-	set_property(TARGET lcov-capture-init PROPERTY SOURCES "")
-
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_INIT}/all_targets.info")
-	lcov_merge_files("${OUTFILE}" ${TSOURCES})
+	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_INIT_FILES})
 	add_custom_target(lcov-geninfo-init ALL	DEPENDS ${OUTFILE}
 		lcov-capture-init
 	)
@@ -176,6 +174,7 @@ endfunction (lcov_capture_initial)
 # target will be used to generate the global info file.
 if (NOT TARGET lcov-capture)
 	add_custom_target(lcov-capture)
+	set(LCOV_CAPTURE_FILES "" CACHE INTERNAL "")
 endif (NOT TARGET lcov-capture)
 
 
@@ -215,8 +214,9 @@ function (lcov_capture_tgt TNAME)
 
 	# add geninfo file generation to global lcov-capture target
 	add_dependencies(lcov-capture ${TNAME}-geninfo)
-	set_property(TARGET lcov-capture APPEND PROPERTY SOURCES ${OUTFILE})
-
+	set(LCOV_CAPTURE_FILES "${LCOV_CAPTURE_FILES}" "${OUTFILE}" CACHE INTERNAL
+		""
+	)
 
 	# Add target for generating html output for this target only.
 	file(MAKE_DIRECTORY ${LCOV_HTML_PATH}/${TNAME})
@@ -235,14 +235,9 @@ endfunction (lcov_capture_tgt)
 # called after all other CMake functions in the root CMakeLists.txt file, to get
 # a full list of all targets that generate coverage data.
 function (lcov_capture)
-	# Get source files of lcov-capture-init and clear sources to avoid error
-	# messages.
-	get_target_property(TSOURCES lcov-capture SOURCES)
-	set_property(TARGET lcov-capture PROPERTY SOURCES "")
-
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_CAPTURE}/all_targets.info")
-	lcov_merge_files("${OUTFILE}" ${TSOURCES})
+	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_FILES})
 	add_custom_target(lcov-geninfo DEPENDS ${OUTFILE} lcov-capture)
 
 	# Add a new global target for all lcov targets. This target could be used to
