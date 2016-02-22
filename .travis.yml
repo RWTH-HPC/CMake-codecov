@@ -4,8 +4,10 @@ matrix:
   include:
     - os: linux
       compiler: gcc
+      sudo: false
     - os: linux
       compiler: clang
+      sudo: false
 
     - os: linux
       dist: trusty
