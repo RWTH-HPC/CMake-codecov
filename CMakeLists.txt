@@ -37,7 +37,12 @@ endif (POLICY CMP0042)
 #
 # project information
 #
-project("test")
+if (${CMAKE_MAJOR_VERSION} EQUAL 3)
+	project("test" LANGUAGES C)
+else ()
+	project("test" C)
+endif ()
+
 
 #
 # cmake configuration
