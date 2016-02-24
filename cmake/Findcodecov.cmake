@@ -210,6 +210,13 @@ function(add_coverage_target TNAME)
 	endforeach ()
 	list(REMOVE_DUPLICATES TARGET_LANGUAGES)
 
+	if ("${TARGET_LANGUAGES}" STREQUAL "")
+		message(AUTHOR_WARNING "Coverage disabled for target ${TNAME} "
+			"because there is no coverage available for target sources."
+		)
+		return()
+	endif()
+
 	set(TARGET_LANG "")
 	set(TEMP_COMPILER "")
 	foreach (LANG ${TARGET_LANGUAGES})
@@ -219,8 +226,7 @@ function(add_coverage_target TNAME)
 			set(TARGET_LANG ${LANG})
 		else ()
 			message(AUTHOR_WARNING "Coverage disabled for target ${TNAME} "
-				"because it will be compiled by different compilers. "
-				"Please set compiler- and linker-flags manual for this target."
+				"because it will be compiled by different compilers."
 			)
 			return()
 		endif ()
