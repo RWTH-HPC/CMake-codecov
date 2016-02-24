@@ -84,8 +84,6 @@ endif ()
 set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
 set(CMAKE_REQUIRED_QUIET ${codecov_FIND_QUIETLY})
 
-set(_COVERAGE_ENABLED_LANGUAGES)
-
 get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach (LANG ${ENABLED_LANGUAGES})
 	# If flags for this compiler were already found, do not try to find them
@@ -128,7 +126,6 @@ foreach (LANG ${ENABLED_LANGUAGES})
 				set(COVERAGE_${LANG}_FLAGS "${FLAG}"
 					CACHE STRING "${LANG} compiler flags for code coverage.")
 				mark_as_advanced(COVERAGE_${LANG}_FLAGS)
-				list(APPEND _COVERAGE_ENABLED_LANGUAGES ${LANG})
 				break()
 			endif ()
 		endforeach ()
