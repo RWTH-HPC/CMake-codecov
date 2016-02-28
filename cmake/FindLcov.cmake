@@ -266,11 +266,13 @@ endfunction (lcov_capture)
 # geninfo on any source file of <TNAME> once and store the info file in the same
 # directory.
 function (add_lcov_target TNAME)
-	# capture initial coverage data
-	lcov_capture_initial_tgt(${TNAME})
+	if (LCOV_FOUND)
+		# capture initial coverage data
+		lcov_capture_initial_tgt(${TNAME})
 
-	# capture coverage data after execution
-	lcov_capture_tgt(${TNAME})
+		# capture coverage data after execution
+		lcov_capture_tgt(${TNAME})
+	endif ()
 endfunction (add_lcov_target)
 
 

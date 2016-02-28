@@ -152,7 +152,6 @@ function (codecov_lang_of_source FILE RETURN_VAR)
 		endif ()
 	endforeach()
 
-	# SOURCEFILE
 	set(${RETURN_VAR} "" PARENT_SCOPE)
 endfunction ()
 
@@ -231,25 +230,19 @@ function(add_coverage_target TNAME)
 
 
 	# enable coverage for target
-	set_property(TARGET ${TNAME}
-		APPEND_STRING
-		PROPERTY COMPILE_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
-	)
-	set_property(TARGET ${TNAME}
-		APPEND_STRING
-		PROPERTY LINK_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
-	)
+	if (COVERAGE_${TARGET_LANG}_FLAGS)
+		set_property(TARGET ${TNAME}
+			APPEND_STRING
+			PROPERTY COMPILE_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
+		)
+		set_property(TARGET ${TNAME}
+			APPEND_STRING
+			PROPERTY LINK_FLAGS " ${COVERAGE_${TARGET_LANG}_FLAGS}"
+		)
 
-
-	# add gcov evaluation
-	if (GCOV_FOUND)
 		add_gcov_target(${TNAME})
-	endif (GCOV_FOUND)
-
-	# add lcov evaluation
-	if (LCOV_FOUND)
 		add_lcov_target(${TNAME})
-	endif (LCOV_FOUND)
+	endif()
 endfunction(add_coverage_target)
 
 
