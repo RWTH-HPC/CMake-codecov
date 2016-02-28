@@ -28,14 +28,47 @@ include(FindPackageHandleStandardArgs)
 
 
 # Search for gcov binary.
-find_program(GCOV_BIN gcov)
-find_package_handle_standard_args(gcov REQUIRED_VARS GCOV_BIN)
+set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
+set(CMAKE_REQUIRED_QUIET ${codecov_FIND_QUIETLY})
+
+get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
+foreach (LANG ${ENABLED_LANGUAGES})
+	# Gcov evaluation is dependend on the used compiler. Check gcov support for
+	# each compiler that is used. If gcov binary was already found for this
+	# compiler, do not try to find it again.
+	if (NOT GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN)
+		if ("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "GNU")
+			find_program(GCOV_BIN gcov)
+
+		elseif ("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Clang")
+			# Some distributions like Debian ship llvm-cov with the compiler
+			# version appended as llvm-cov-x.y. To find this binary we'll build
+			# the suggested binary name with the compiler version.
+			string(REGEX MATCH "^[0-9]+.[0-9]+" LLVM_VERSION
+				"${CMAKE_${LANG}_COMPILER_VERSION}")
+			find_program(GCOV_BIN NAMES "llvm-cov-${LLVM_VERSION}" "llvm-cov")
+			if (GCOV_BIN)
+				# set additional parameters
+				set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS "gcov" CACHE
+					STRING "Additional parameters for llvm-cov.")
+			endif ()
+		endif ()
 
 
-# If Gcov was not found, exit module now.
-if (NOT GCOV_FOUND)
-	return()
-endif (NOT GCOV_FOUND)
+		if (GCOV_BIN)
+			set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN "${GCOV_BIN}" CACHE STRING
+				"${LANG} gcov binary.")
+			mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN)
+			unset(GCOV_BIN)
+
+			if (NOT CMAKE_REQUIRED_QUIET)
+				message("-- Found gcov evaluation for "
+				"${CMAKE_${LANG}_COMPILER_ID}: ${GCOV_BIN}")
+			endif()
+		endif ()
+	endif ()
+endforeach ()
+
 
 
 
@@ -55,17 +88,32 @@ endif (NOT TARGET gcov)
 function (add_gcov_target TNAME)
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
 
+	# We don't have to check, if the target has support for coverage, thus this
+	# will be checked by add_coverage_target in Findcoverage.cmake. Instead we
+	# have to determine which gcov binary to use.
 	get_target_property(TSOURCES ${TNAME} SOURCES)
 	set(SOURCES "")
-	foreach(FILE ${TSOURCES})
+	set(TCOMPILER "")
+	foreach (FILE ${TSOURCES})
 		codecov_path_of_source(${FILE} FILE)
 		if (NOT "${FILE}" STREQUAL "")
 			codecov_lang_of_source(${FILE} LANG)
 			if (NOT "${LANG}" STREQUAL "")
 				list(APPEND SOURCES "${FILE}")
+				set(TCOMPILER ${CMAKE_${LANG}_COMPILER_ID})
 			endif ()
 		endif ()
-	endforeach()
+	endforeach ()
+
+	# If no gcov binary was found, coverage data can't be evaluated.
+	if (NOT GCOV_${TCOMPILER}_BIN)
+		message(WARNING "No coverage evaluation binary found for ${TCOMPILER}.")
+		return()
+	endif ()
+
+	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
+	set(GCOV_OPTIONS "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS}")
+
 
 	set(BUFFER "")
 	foreach(FILE ${SOURCES})
@@ -73,7 +121,7 @@ function (add_gcov_target TNAME)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+			COMMAND ${GCOV_BIN} ${GCOV_OPTIONS} ${TDIR}/${FILE}.gcno > /dev/null
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${FILE_PATH}
 		)

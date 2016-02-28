@@ -32,6 +32,28 @@ set(LCOV_HTML_PATH "${CMAKE_BINARY_DIR}/lcov/html")
 
 
 
+# This function will add lcov evaluation for target <TNAME>. Only sources of
+# this target will be evaluated and no dependencies will be added. It will call
+# geninfo on any source file of <TNAME> once and store the info file in the same
+# directory.
+#
+# Note: This function is only a wrapper to define this function always, even if
+#   coverage is not supported by the compiler or disabled. This function must
+#   be defined here, because the module will be exited, if there is no coverage
+#   support by the compiler or it is disabled by the user.
+function (add_lcov_target TNAME)
+	if (LCOV_FOUND)
+		# capture initial coverage data
+		lcov_capture_initial_tgt(${TNAME})
+
+		# capture coverage data after execution
+		lcov_capture_tgt(${TNAME})
+	endif ()
+endfunction (add_lcov_target)
+
+
+
+
 # Search for Gcov which is used by Lcov. If it is not found, we can exit this
 # module now.
 find_package(Gcov)
@@ -257,23 +279,6 @@ function (lcov_capture)
 		)
 	endif ()
 endfunction (lcov_capture)
-
-
-
-
-# This function will add lcov evaluation for target <TNAME>. Only sources of
-# this target will be evaluated and no dependencies will be added. It will call
-# geninfo on any source file of <TNAME> once and store the info file in the same
-# directory.
-function (add_lcov_target TNAME)
-	if (LCOV_FOUND)
-		# capture initial coverage data
-		lcov_capture_initial_tgt(${TNAME})
-
-		# capture coverage data after execution
-		lcov_capture_tgt(${TNAME})
-	endif ()
-endfunction (add_lcov_target)
 
 
 
