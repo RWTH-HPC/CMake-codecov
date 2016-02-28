@@ -46,7 +46,8 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			# the suggested binary name with the compiler version.
 			string(REGEX MATCH "^[0-9]+.[0-9]+" LLVM_VERSION
 				"${CMAKE_${LANG}_COMPILER_VERSION}")
-			find_program(GCOV_BIN NAMES "llvm-cov-${LLVM_VERSION}" "llvm-cov")
+			find_program(GCOV_BIN NAMES "llvm-cov-${LLVM_VERSION}" "llvm-cov"
+				"gcov")
 			if (GCOV_BIN)
 				# set additional parameters
 				set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS "gcov" CACHE
