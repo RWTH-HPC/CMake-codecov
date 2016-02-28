@@ -51,6 +51,7 @@ foreach (LANG ${ENABLED_LANGUAGES})
 				# set additional parameters
 				set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS "gcov" CACHE
 					STRING "Additional parameters for llvm-cov.")
+				mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS)
 			endif ()
 		endif ()
 
@@ -59,12 +60,13 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN "${GCOV_BIN}" CACHE STRING
 				"${LANG} gcov binary.")
 			mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN)
-			unset(GCOV_BIN)
 
 			if (NOT CMAKE_REQUIRED_QUIET)
 				message("-- Found gcov evaluation for "
 				"${CMAKE_${LANG}_COMPILER_ID}: ${GCOV_BIN}")
 			endif()
+
+			unset(GCOV_BIN CACHE)
 		endif ()
 	endif ()
 endforeach ()
