@@ -42,16 +42,29 @@ then
 fi
 
 
-OPT="gcov"
 if [ -n "$LLVM_VERSION" ]
 then
 	MAJOR=$(echo $LLVM_VERSION | cut -d'.' -f1)
 	MINOR=$(echo $LLVM_VERSION | cut -d'.' -f2)
 
+	if [ $MAJOR -eq 3 ] && [ $MINOR -le 4 ]
+	then
+		if [ -f "$1" ]
+		then
+			filename=$(basename "$1")
+			extension="${filename##*.}"
+
+			case "$extension" in
+				"gcno") exec $LLVM_COV_BIN --gcno="$1" ;;
+				"gcda") exec $LLVM_COV_BIN --gcda="$1" ;;
+			esac
+		fi
+	fi
+
 	if [ $MAJOR -eq 3 ] && [ $MINOR -le 5 ]
 	then
-		OPT=""
+		exec $LLVM_COV_BIN $@
 	fi
 fi
 
-exec $LLVM_COV_BIN $OPT $@
+exec $LLVM_COV_BIN gcov $@
