@@ -30,4 +30,9 @@ then
 	exit 1
 fi
 
-$LLVM_COV_BIN gcov $@
+if [ "$1" = "-v" ]
+then
+	exec $LLVM_COV_BIN --version
+fi
+
+exec $LLVM_COV_BIN gcov $@
