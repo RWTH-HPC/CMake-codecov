@@ -46,7 +46,7 @@ then
 	MAJOR=$(echo $LLVM_VERSION | cut -d'.' -f1)
 	MINOR=$(echo $LLVM_VERSION | cut -d'.' -f2)
 
-	if [ $MAJOR -eq 3 ] && [ $MINOR -le 4 ]
+	if [ $MAJOR -eq 3 ] && [ $MINOR -le 5 ]
 	then
 		OPT=""
 	fi
