@@ -46,13 +46,24 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			# the suggested binary name with the compiler version.
 			string(REGEX MATCH "^[0-9]+.[0-9]+" LLVM_VERSION
 				"${CMAKE_${LANG}_COMPILER_VERSION}")
-			find_program(GCOV_BIN NAMES "llvm-cov-${LLVM_VERSION}" "llvm-cov"
-				"gcov")
-			if (GCOV_BIN)
-				# set additional parameters
-				set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS "gcov" CACHE
-					STRING "Additional parameters for llvm-cov.")
-				mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS)
+			find_program(LLVM_COV_BIN NAMES "llvm-cov-${LLVM_VERSION}"
+				"llvm-cov")
+			if (LLVM_COV_BIN)
+				find_program(LLVM_COV_WRAPPER "llvm-cov-wrapper" PATHS
+					${CMAKE_MODULE_PATH})
+				if (LLVM_COV_WRAPPER)
+					set(GCOV_BIN "${LLVM_COV_WRAPPER}" CACHE FILEPATH "")
+
+					# set additional parameters
+					set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV
+						"LLVM_COV_BIN=${LLVM_COV_BIN}" CACHE STRING
+						"Environment variables for llvm-cov-wrapper.")
+					mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV)
+				endif ()
+			else ()
+				# Fall back to gcov binary if llvm-cov was not found. This is
+				# the default on OSX, but may crash on recent Linux versions.
+				find_program(GCOV_BIN gcov)
 			endif ()
 		endif ()
 
@@ -115,7 +126,7 @@ function (add_gcov_target TNAME)
 	endif ()
 
 	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
-	set(GCOV_OPTIONS "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_PARAMS}")
+	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
 
 
 	set(BUFFER "")
@@ -124,7 +135,7 @@ function (add_gcov_target TNAME)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_BIN} ${GCOV_OPTIONS} ${TDIR}/${FILE}.gcno > /dev/null
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${FILE_PATH}
 		)

@@ -164,6 +164,7 @@ function (lcov_capture_initial_tgt TNAME)
 	endif ()
 
 	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
+	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
 
 
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
@@ -173,8 +174,8 @@ function (lcov_capture_initial_tgt TNAME)
 		set(OUTFILE "${TDIR}/${FILE}.info.init")
 		list(APPEND GENINFO_FILES ${OUTFILE})
 
-		add_custom_command(OUTPUT ${OUTFILE} COMMAND ${GENINFO_BIN} --quiet
-				--base-directory ${PROJECT_SOURCE_DIR} --initial
+		add_custom_command(OUTPUT ${OUTFILE} COMMAND ${GCOV_ENV} ${GENINFO_BIN}
+				--quiet --base-directory ${PROJECT_SOURCE_DIR} --initial
 				--gcov-tool ${GCOV_BIN} --output-filename ${OUTFILE}
 				${TDIR}/${FILE}.gcno
 			DEPENDS ${TNAME}
@@ -248,6 +249,7 @@ function (lcov_capture_tgt TNAME)
 	endif ()
 
 	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
+	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
 
 
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
@@ -260,9 +262,9 @@ function (lcov_capture_tgt TNAME)
 
 		add_custom_command(OUTPUT ${OUTFILE}
 			COMMAND test -f "${TDIR}/${FILE}.gcda"
-				&& ${GENINFO_BIN} --base-directory ${PROJECT_SOURCE_DIR}
-					--gcov-tool ${GCOV_BIN} --output-filename ${OUTFILE}
-					--quiet ${TDIR}/${FILE}.gcda
+				&& ${GCOV_ENV} ${GENINFO_BIN} --quiet --base-directory
+					${PROJECT_SOURCE_DIR} --gcov-tool ${GCOV_BIN}
+					--output-filename ${OUTFILE} ${TDIR}/${FILE}.gcda
 				|| cp ${OUTFILE}.init ${OUTFILE}
 			DEPENDS ${TNAME} ${TNAME}-capture-init
 			COMMENT "Capturing coverage data for ${FILE}"
