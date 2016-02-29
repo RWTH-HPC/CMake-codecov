@@ -30,15 +30,17 @@ then
 	exit 1
 fi
 
-if [ "$1" = "-v" ]
-then
-	exec $LLVM_COV_BIN --version
-fi
 
-
-# get LLVM version to find out, if gcov parameter is required.
+# Get LLVM version to find out.
 LLVM_VERSION=$($LLVM_COV_BIN -version | grep "LLVM version" \
 	| sed "s/^.*\([0-9]\).\([0-9]\).\([0-9]\)/\1.\2/g")
+
+if [ "$1" = "-v" ]
+then
+	echo "llvm-cov-wrapper $LLVM_VERSION"
+	exit 0
+fi
+
 
 OPT="gcov"
 if [ -n "$LLVM_VERSION" ]
