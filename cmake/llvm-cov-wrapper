@@ -35,4 +35,21 @@ then
 	exec $LLVM_COV_BIN --version
 fi
 
-exec $LLVM_COV_BIN gcov $@
+
+# get LLVM version to find out, if gcov parameter is required.
+LLVM_VERSION=$($LLVM_COV_BIN -version | grep "LLVM version" \
+	| sed "s/^.*\([0-9]\).\([0-9]\).\([0-9]\)/\1.\2/g")
+
+OPT="gcov"
+if [ -n "$LLVM_VERSION" ]
+then
+	MAJOR=$(echo $LLVM_VERSION | cut -d'.' -f1)
+	MINOR=$(echo $LLVM_VERSION | cut -d'.' -f2)
+
+	if [ $MAJOR -eq 3 ] && [ $MINOR -le 4 ]
+	then
+		OPT=""
+	fi
+fi
+
+exec $LLVM_COV_BIN $OPT $@
