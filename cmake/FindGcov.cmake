@@ -46,23 +46,34 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			# the suggested binary name with the compiler version.
 			string(REGEX MATCH "^[0-9]+.[0-9]+" LLVM_VERSION
 				"${CMAKE_${LANG}_COMPILER_VERSION}")
-			find_program(LLVM_COV_BIN NAMES "llvm-cov-${LLVM_VERSION}"
-				"llvm-cov")
-			if (LLVM_COV_BIN)
-				find_program(LLVM_COV_WRAPPER "llvm-cov-wrapper" PATHS
-					${CMAKE_MODULE_PATH})
-				if (LLVM_COV_WRAPPER)
-					set(GCOV_BIN "${LLVM_COV_WRAPPER}" CACHE FILEPATH "")
 
-					# set additional parameters
-					set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV
-						"LLVM_COV_BIN=${LLVM_COV_BIN}" CACHE STRING
-						"Environment variables for llvm-cov-wrapper.")
-					mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV)
+			# llvm-cov prior version 3.5 seems to be not working with coverage
+			# evaluation tools, but these versions are compatible with the gcc
+			# gcov tool.
+			if(LLVM_VERSION VERSION_GREATER 3.4)
+				find_program(LLVM_COV_BIN NAMES "llvm-cov-${LLVM_VERSION}"
+					"llvm-cov")
+				mark_as_advanced(LLVM_COV_BIN)
+
+				if (LLVM_COV_BIN)
+					find_program(LLVM_COV_WRAPPER "llvm-cov-wrapper" PATHS
+						${CMAKE_MODULE_PATH})
+					if (LLVM_COV_WRAPPER)
+						set(GCOV_BIN "${LLVM_COV_WRAPPER}" CACHE FILEPATH "")
+
+						# set additional parameters
+						set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV
+							"LLVM_COV_BIN=${LLVM_COV_BIN}" CACHE STRING
+							"Environment variables for llvm-cov-wrapper.")
+						mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV)
+					endif ()
 				endif ()
-			else ()
-				# Fall back to gcov binary if llvm-cov was not found. This is
-				# the default on OSX, but may crash on recent Linux versions.
+			endif ()
+
+			if (NOT GCOV_BIN)
+				# Fall back to gcov binary if llvm-cov was not found or is
+				# incompatible. This is the default on OSX, but may crash on
+				# recent Linux versions.
 				find_program(GCOV_BIN gcov)
 			endif ()
 		endif ()
@@ -71,7 +82,6 @@ foreach (LANG ${ENABLED_LANGUAGES})
 		if (GCOV_BIN)
 			set(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN "${GCOV_BIN}" CACHE STRING
 				"${LANG} gcov binary.")
-			mark_as_advanced(GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN)
 
 			if (NOT CMAKE_REQUIRED_QUIET)
 				message("-- Found gcov evaluation for "
