@@ -135,8 +135,8 @@ function (add_gcov_target TNAME)
 		return()
 	endif ()
 
-	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
-	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
+	set(GCOV_BIN "${GCOV_${TCOMPILER}_BIN}")
+	set(GCOV_ENV "${GCOV_${TCOMPILER}_ENV}")
 
 
 	set(BUFFER "")

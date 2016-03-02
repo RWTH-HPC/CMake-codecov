@@ -163,8 +163,8 @@ function (lcov_capture_initial_tgt TNAME)
 		return()
 	endif ()
 
-	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
-	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
+	set(GCOV_BIN "${GCOV_${TCOMPILER}_BIN}")
+	set(GCOV_ENV "${GCOV_${TCOMPILER}_ENV}")
 
 
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
@@ -248,8 +248,8 @@ function (lcov_capture_tgt TNAME)
 		return()
 	endif ()
 
-	set(GCOV_BIN "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN}")
-	set(GCOV_ENV "${GCOV_${CMAKE_${LANG}_COMPILER_ID}_ENV}")
+	set(GCOV_BIN "${GCOV_${TCOMPILER}_BIN}")
+	set(GCOV_ENV "${GCOV_${TCOMPILER}_ENV}")
 
 
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
