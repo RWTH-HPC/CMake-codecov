@@ -33,7 +33,6 @@ addons:
       - lcov
 
 before_install:
-  - pip install --user codecov
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update --quiet ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install lcov; fi
 
@@ -45,4 +44,4 @@ script:
   - make lcov
 
 after_success:
-  - codecov
+  - bash <(curl -s https://codecov.io/bash) -X gcov
