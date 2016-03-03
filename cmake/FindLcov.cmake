@@ -107,19 +107,21 @@ file(MAKE_DIRECTORY ${LCOV_DATA_PATH_CAPTURE})
 function (lcov_merge_files OUTFILE ...)
 	# Remove ${OUTFILE} from ${ARGV} and generate lcov parameters with files.
 	list(REMOVE_AT ARGV 0)
-	set(LCOV_ARGS "")
-	foreach (FILE ${ARGV})
-		list(APPEND LCOV_ARGS -a ${FILE})
-	endforeach ()
 
 	# Generate merged file.
 	string(REPLACE "${CMAKE_BINARY_DIR}/" "" FILE_REL "${OUTFILE}")
-	add_custom_command(OUTPUT "${OUTFILE}"
-		COMMAND ${LCOV_BIN} ${LCOV_ARGS} --base-directory ${PROJECT_SOURCE_DIR}
-			${LCOV_EXTERN_FLAG} --output-file ${OUTFILE} --quiet
-			${LCOV_EXTRA_FLAGS}
+	add_custom_command(OUTPUT "${OUTFILE}.raw"
+		COMMAND cat ${ARGV} > ${OUTFILE}.raw
 		DEPENDS ${ARGV}
 		COMMENT "Generating ${FILE_REL}"
+	)
+
+	add_custom_command(OUTPUT "${OUTFILE}"
+		COMMAND ${LCOV_BIN} --quiet -a ${OUTFILE}.raw ${LCOV_EXTERN_FLAG}
+			--base-directory ${PROJECT_SOURCE_DIR} --output-file ${OUTFILE}
+			${LCOV_EXTRA_FLAGS}
+		DEPENDS ${OUTFILE}.raw
+		COMMENT "Post-processing ${FILE_REL}"
 	)
 endfunction ()
 
