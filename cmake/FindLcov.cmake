@@ -254,7 +254,7 @@ function (lcov_capture_tgt TNAME)
 
 	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
 	set(GENINFO_FILES "")
-	foreach(FILE ${TSOURCES})
+	foreach(FILE ${SOURCES})
 		# Generate coverage files. If no .gcda file was generated during
 		# execution, the empty coverage file will be used instead.
 		set(OUTFILE "${TDIR}/${FILE}.info")
