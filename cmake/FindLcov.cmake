@@ -79,14 +79,16 @@ if (NOT CPPFILT_BIN STREQUAL "")
 endif (NOT CPPFILT_BIN STREQUAL "")
 
 # enable no-external flag for lcov, if available.
-if (NOT LCOV_BIN STREQUAL "")
-	execute_process(COMMAND ${LCOV_BIN} --help OUTPUT_VARIABLE LCOV_HELP)
-	string(REGEX MATCH "external" LCOV_RES "${LCOV_HELP}")
-	if ("${LCOV_RES}" STREQUAL "")
-		set(LCOV_EXTERN_FLAG "")
-	else ()
-		set(LCOV_EXTERN_FLAG "--no-external")
+if (GENINFO_BIN AND NOT DEFINED GENINFO_EXTERN_FLAG)
+	set(FLAG "")
+	execute_process(COMMAND ${GENINFO_BIN} --help OUTPUT_VARIABLE GENINFO_HELP)
+	string(REGEX MATCH "external" GENINFO_RES "${GENINFO_HELP}")
+	if (GENINFO_RES)
+		set(FLAG "--no-external")
 	endif ()
+
+	set(GENINFO_EXTERN_FLAG "${FLAG}"
+		CACHE STRING "Geninfo flag to exclude system sources.")
 endif ()
 
 # If Lcov was not found, exit module now.
@@ -117,9 +119,8 @@ function (lcov_merge_files OUTFILE ...)
 	)
 
 	add_custom_command(OUTPUT "${OUTFILE}"
-		COMMAND ${LCOV_BIN} --quiet -a ${OUTFILE}.raw ${LCOV_EXTERN_FLAG}
-			--base-directory ${PROJECT_SOURCE_DIR} --output-file ${OUTFILE}
-			${LCOV_EXTRA_FLAGS}
+		COMMAND ${LCOV_BIN} --quiet -a ${OUTFILE}.raw --output-file ${OUTFILE}
+			--base-directory ${PROJECT_SOURCE_DIR} ${LCOV_EXTRA_FLAGS}
 		DEPENDS ${OUTFILE}.raw
 		COMMENT "Post-processing ${FILE_REL}"
 	)
@@ -179,7 +180,7 @@ function (lcov_capture_initial_tgt TNAME)
 		add_custom_command(OUTPUT ${OUTFILE} COMMAND ${GCOV_ENV} ${GENINFO_BIN}
 				--quiet --base-directory ${PROJECT_SOURCE_DIR} --initial
 				--gcov-tool ${GCOV_BIN} --output-filename ${OUTFILE}
-				${TDIR}/${FILE}.gcno
+				${GENINFO_EXTERN_FLAG} ${TDIR}/${FILE}.gcno
 			DEPENDS ${TNAME}
 			COMMENT "Capturing initial coverage data for ${FILE}"
 		)
@@ -266,7 +267,8 @@ function (lcov_capture_tgt TNAME)
 			COMMAND test -f "${TDIR}/${FILE}.gcda"
 				&& ${GCOV_ENV} ${GENINFO_BIN} --quiet --base-directory
 					${PROJECT_SOURCE_DIR} --gcov-tool ${GCOV_BIN}
-					--output-filename ${OUTFILE} ${TDIR}/${FILE}.gcda
+					--output-filename ${OUTFILE} ${GENINFO_EXTERN_FLAG}
+					${TDIR}/${FILE}.gcda
 				|| cp ${OUTFILE}.init ${OUTFILE}
 			DEPENDS ${TNAME} ${TNAME}-capture-init
 			COMMENT "Capturing coverage data for ${FILE}"
