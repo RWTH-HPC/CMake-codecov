@@ -40,7 +40,7 @@ If coverage is supported by your compiler, the specified targets will be build w
 
 Different compilers may be using different implementations for code coverage. If you'll try to cover targets with C and Fortran code but don't use gcc & gfortran but clang & gfortran, this will cause linking problems. To avoid this, such problems will be detected and coverage will be disabled for such targets.
 
-Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. E.g. Travis CI trusty builds may cause such issues. To avoid this, you must install an older gcc version, too, and make the older gcov binary to your default gcov. For an example take a look at the [Travis CI configuration file](.travis.yml).
+Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. [FindGcov.cmake](cmake/FindGcov.cmake) tries to find a compatible coverage evaluation tool to avoid this issue, but may fail. In this case you should check coverage with a different compiler or install a compatible coverage tool.
 
 ### Build targets with coverage support
 
