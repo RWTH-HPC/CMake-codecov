@@ -37,8 +37,17 @@ foreach (LANG ${ENABLED_LANGUAGES})
 	# each compiler that is used. If gcov binary was already found for this
 	# compiler, do not try to find it again.
 	if (NOT GCOV_${CMAKE_${LANG}_COMPILER_ID}_BIN)
+		get_filename_component(COMPILER_PATH "${CMAKE_${LANG}_COMPILER}" PATH)
+
 		if ("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "GNU")
-			find_program(GCOV_BIN gcov)
+			# Some distributions like OSX (homebrew) ship gcov with the compiler
+			# version appended as gcov-x. To find this binary we'll build the
+			# suggested binary name with the compiler version.
+			string(REGEX MATCH "^[0-9]+" GCC_VERSION
+				"${CMAKE_${LANG}_COMPILER_VERSION}")
+
+			find_program(GCOV_BIN NAMES gcov-${GCC_VERSION} gcov
+				HINTS ${COMPILER_PATH})
 
 		elseif ("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Clang")
 			# Some distributions like Debian ship llvm-cov with the compiler
@@ -52,7 +61,7 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			# gcov tool.
 			if(LLVM_VERSION VERSION_GREATER 3.4)
 				find_program(LLVM_COV_BIN NAMES "llvm-cov-${LLVM_VERSION}"
-					"llvm-cov")
+					"llvm-cov" HINTS ${COMPILER_PATH})
 				mark_as_advanced(LLVM_COV_BIN)
 
 				if (LLVM_COV_BIN)
@@ -74,7 +83,7 @@ foreach (LANG ${ENABLED_LANGUAGES})
 				# Fall back to gcov binary if llvm-cov was not found or is
 				# incompatible. This is the default on OSX, but may crash on
 				# recent Linux versions.
-				find_program(GCOV_BIN gcov)
+				find_program(GCOV_BIN gcov HINTS ${COMPILER_PATH})
 			endif ()
 		endif ()
 
