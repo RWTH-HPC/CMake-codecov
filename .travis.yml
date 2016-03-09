@@ -22,13 +22,15 @@ matrix:
       compiler: gcc
       before_install:
         - brew update --quiet >& /dev/null
-        - brew upgrade gcc cmake
+        - brew outdated gcc || brew upgrade gcc
+        - brew outdated cmake || brew upgrade cmake
         - brew install lcov
     - os: osx
       compiler: clang
       before_install:
         - brew update --quiet >& /dev/null
-        - brew upgrade gcc cmake
+        - brew outdated gcc || brew upgrade gcc
+        - brew outdated cmake || brew upgrade cmake
         - brew install lcov
 
 
