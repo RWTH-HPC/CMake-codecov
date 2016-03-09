@@ -20,8 +20,16 @@ matrix:
 
     - os: osx
       compiler: gcc
+      before_install:
+        - brew update --quiet >& /dev/null
+        - brew upgrade gcc
+        - brew install lcov
     - os: osx
       compiler: clang
+      before_install:
+        - brew update --quiet >& /dev/null
+        - brew upgrade gcc
+        - brew install lcov
 
 
 addons:
@@ -32,10 +40,6 @@ addons:
       - cmake
       - lcov
       - gfortran
-
-before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update --quiet ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install lcov; fi
 
 
 script:
