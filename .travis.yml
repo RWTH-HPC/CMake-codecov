@@ -31,6 +31,7 @@ addons:
     packages:
       - cmake
       - lcov
+      - gfortran
 
 before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update --quiet ; fi

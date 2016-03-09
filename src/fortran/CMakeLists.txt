@@ -22,9 +22,6 @@
 # Written by Alexander Haase, alexander.haase@rwth-aachen.de
 #
 
-
-# recurse into subdirectories
-add_subdirectory(libfoo)
-add_subdirectory(bar)
-add_subdirectory(libheader)
-add_subdirectory(fortran)
+add_executable(hello_fortran hello.f)
+add_coverage(hello_fortran)
+add_test(test_fortran hello_fortran)
