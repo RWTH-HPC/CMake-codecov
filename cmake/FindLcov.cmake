@@ -204,6 +204,12 @@ endfunction (lcov_capture_initial_tgt)
 # called after all other CMake functions in the root CMakeLists.txt file, to get
 # a full list of all targets that generate coverage data.
 function (lcov_capture_initial)
+	# Skip this function (and do not create the following targets), if there are
+	# no input files.
+	if ("${LCOV_CAPTURE_INIT_FILES}" STREQUAL "")
+		return()
+	endif ()
+
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_INIT}/all_targets.info")
 	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_INIT_FILES})
@@ -303,6 +309,12 @@ endfunction (lcov_capture_tgt)
 # called after all other CMake functions in the root CMakeLists.txt file, to get
 # a full list of all targets that generate coverage data.
 function (lcov_capture)
+	# Skip this function (and do not create the following targets), if there are
+	# no input files.
+	if ("${LCOV_CAPTURE_FILES}" STREQUAL "")
+		return()
+	endif ()
+
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_CAPTURE}/all_targets.info")
 	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_FILES})
