@@ -48,7 +48,9 @@ set(COVERAGE_FLAG_CANDIDATES
 function (add_coverage TNAME)
 	# only add coverage for target, if coverage is support and enabled.
 	if (ENABLE_COVERAGE)
-		add_coverage_target(${TNAME})
+		foreach (TNAME ${ARGV})
+			add_coverage_target(${TNAME})
+		endforeach ()
 	endif ()
 endfunction (add_coverage)
 
