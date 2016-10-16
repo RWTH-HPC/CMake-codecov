@@ -20,18 +20,8 @@ matrix:
 
     - os: osx
       compiler: gcc
-      before_install:
-        - brew update --quiet >& /dev/null
-        - brew outdated gcc || brew upgrade gcc
-        - brew outdated cmake || brew upgrade cmake
-        - brew install lcov
     - os: osx
       compiler: clang
-      before_install:
-        - brew update --quiet >& /dev/null
-        - brew outdated gcc || brew upgrade gcc
-        - brew outdated cmake || brew upgrade cmake
-        - brew install lcov
 
 
 addons:
@@ -43,6 +33,23 @@ addons:
       - lcov
       - gfortran
 
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];
+    then
+      brew update --quiet >& /dev/null;
+    fi
+  # The following solution was inspired by http://stackoverflow.com/a/20802381
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]];
+    then
+      for pkg in gcc cmake lcov; do
+        if brew list -1 | grep -q "^${pkg}\$"; then
+          brew outdated $pkg || brew upgrade $pkg;
+        else
+          brew install $pkg;
+        fi
+      done
+    fi
 
 script:
   - mkdir build && cd build
