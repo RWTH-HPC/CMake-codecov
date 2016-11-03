@@ -1,7 +1,7 @@
 # CMake-codecov
 
 [![Travis](https://img.shields.io/travis/RWTH-ELP/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![Codecov](https://img.shields.io/codecov/c/github/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)  [![](https://img.shields.io/github/issues-raw/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://github.com/RWTH-ELP/CMake-codecov/issues)
-[![GPL license](http://img.shields.io/badge/license-GPL-blue.svg?style=flat-square)](http://www.gnu.org/licenses/)
+[![BSD (3-clause)](http://img.shields.io/badge/license-3--clause_BSD-blue.svg?style=flat-square)](LICENSE)
 
 CMake module to enable code coverage easily and generate coverage reports with CMake targets.
 
@@ -101,8 +101,6 @@ You found a bug? Please fill out an issue and include any data to reproduce the 
 
 ## License
 
-CMake-codecov is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+CMake-codecov is released under the 3-clause BSD license. See the [LICENSE](LICENSE) file for more information.
 
-This program is distributed in the hope that it will be useful,but **WITHOUT ANY WARRANTY**; without even the implied warranty of **MERCHANTABILITY** or **FITNESS FOR A PARTICULAR PURPOSE**. See the GNU General Public License for more details. A Copy of the GPL can be found in the [LICENSE](LICENSE) file.
-
-Copyright (c) 2015-2016 RWTH Aachen University, Federal Republic of Germany.
+Copyright &copy; 2015-2016 RWTH Aachen University, Federal Republic of Germany.
