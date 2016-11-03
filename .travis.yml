@@ -19,8 +19,6 @@ matrix:
       compiler: clang
 
     - os: osx
-      compiler: gcc
-    - os: osx
       compiler: clang
 
 
