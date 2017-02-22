@@ -23,14 +23,6 @@ set(COVERAGE_FLAG_CANDIDATES
 )
 
 
-# To avoid error messages about CMP0051, this policy will be set to new. There
-# will be no problem, as TARGET_OBJECTS generator expressions will be filtered
-# with a regular expression from the sources.
-if (POLICY CMP0051)
-	cmake_policy(SET CMP0051 NEW)
-endif()
-
-
 # Add coverage support for target ${TNAME} and register target for coverage
 # evaluation. If coverage is disabled or not supported, this function will
 # simply do nothing.
