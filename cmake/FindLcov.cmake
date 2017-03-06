@@ -89,6 +89,7 @@ endif (NOT LCOV_FOUND)
 file(MAKE_DIRECTORY ${LCOV_DATA_PATH_INIT})
 file(MAKE_DIRECTORY ${LCOV_DATA_PATH_CAPTURE})
 
+set(LCOV_REMOVE_PATTERNS "")
 
 # This function will merge lcov files to a single target file. Additional lcov
 # flags may be set with setting LCOV_EXTRA_FLAGS before calling this function.
@@ -107,6 +108,8 @@ function (lcov_merge_files OUTFILE ...)
 	add_custom_command(OUTPUT "${OUTFILE}"
 		COMMAND ${LCOV_BIN} --quiet -a ${OUTFILE}.raw --output-file ${OUTFILE}
 			--base-directory ${PROJECT_SOURCE_DIR} ${LCOV_EXTRA_FLAGS}
+		COMMAND ${LCOV_BIN} --quiet -r ${OUTFILE} ${LCOV_REMOVE_PATTERNS}
+			--output-file ${OUTFILE} ${LCOV_EXTRA_FLAGS}
 		DEPENDS ${OUTFILE}.raw
 		COMMENT "Post-processing ${FILE_REL}"
 	)

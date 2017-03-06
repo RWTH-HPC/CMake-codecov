@@ -87,6 +87,13 @@ Lcov is a console program to evaluate the generate coverage data, but instead of
 |```lcov-genhtml```|Generate a *single* report for all evaluated data that is available now. **Note:** You have to call ```<TARGET>-geninfo``` for all targets you want to have in this report before calling this target or ```lcov-geninfo```. You can use this option, if you like to have a single report for the targets ```foo``` and ```bar``` together, but without all the other targets. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/selected_targets```.|
 |```lcov```|Generate a *single* report for all targets. This target will call ```lcov-geninfo``` before. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/all_targets```.|
 
+##### Excluding files from coverage reports
+If you want to exclude some files from your coverage reports by ```lcov --remove``` subcommand, you can append their path patterns to ```LCOV_REMOVE_PATTERNS``` in your CMakeLists.txt like a following example.
+```CMake
+list(APPEND LCOV_REMOVE_PATTERNS "'${PROJECT_SOURCE_DIR}/extlib/*'")
+```
+Note that asterisks in patterns should not be expanded by the shell interpreter.
+
 
 ## Contribute
 
