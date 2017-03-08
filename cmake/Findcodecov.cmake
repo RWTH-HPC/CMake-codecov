@@ -117,6 +117,10 @@ foreach (LANG ${ENABLED_LANGUAGES})
 					CACHE STRING "${COMPILER} flags for code coverage.")
 				mark_as_advanced(COVERAGE_${COMPILER}_FLAGS)
 				break()
+			else ()
+				message(WARNING "Code coverage is not available for ${COMPILER}"
+				        " compiler. Targets using this compiler will be "
+				        "compiled without it.")
 			endif ()
 		endforeach ()
 	endif ()
@@ -205,14 +209,20 @@ function(add_coverage_target TNAME)
 	list(LENGTH TARGET_COMPILER NUM_COMPILERS)
 
 	if (NUM_COMPILERS GREATER 1)
-		message(AUTHOR_WARNING "Coverage disabled for target ${TNAME} because "
-			"it will be compiled by different compilers.")
+		message(WARNING "Can't use code coverage for target ${TNAME}, because "
+		        "it will be compiled by incompatible compilers. Target will be "
+		        "compiled without code coverage.")
 		return()
 
-	elseif ((NUM_COMPILERS EQUAL 0) OR
-		(NOT DEFINED "COVERAGE_${TARGET_COMPILER}_FLAGS"))
-		message(AUTHOR_WARNING "Coverage disabled for target ${TNAME} "
-			"because there is no sanitizer available for target sources.")
+	elseif (NUM_COMPILERS EQUAL 0)
+		message(WARNING "Can't use code coverage for target ${TNAME}, because "
+		        "it uses an unknown compiler. Target will be compiled without "
+		        "code coverage.")
+		return()
+
+	elseif (NOT DEFINED "COVERAGE_${TARGET_COMPILER}_FLAGS")
+		# A warning has been printed before, so just return if flags for this
+		# compiler aren't available.
 		return()
 	endif()
 
