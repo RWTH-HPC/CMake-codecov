@@ -1,7 +1,9 @@
 # CMake-codecov
 
-[![Travis](https://img.shields.io/travis/RWTH-ELP/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-ELP/CMake-codecov) [![Codecov](https://img.shields.io/codecov/c/github/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://codecov.io/github/RWTH-ELP/CMake-codecov?branch=master)  [![](https://img.shields.io/github/issues-raw/RWTH-ELP/CMake-codecov.svg?style=flat-square)](https://github.com/RWTH-ELP/CMake-codecov/issues)
-[![BSD (3-clause)](http://img.shields.io/badge/license-3--clause_BSD-blue.svg?style=flat-square)](LICENSE)
+[![Travis](https://img.shields.io/travis/RWTH-HPC/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-HPC/CMake-codecov)
+[![Codecov](https://img.shields.io/codecov/c/github/RWTH-HPC/CMake-codecov.svg?style=flat-square)](https://codecov.io/github/RWTH-HPC/CMake-codecov?branch=master)
+[![](https://img.shields.io/github/issues-raw/RWTH-HPC/CMake-codecov.svg?style=flat-square)](https://github.com/RWTH-HPC/CMake-codecov/issues)
+[![](http://img.shields.io/badge/license-3--clause_BSD-blue.svg?style=flat-square)](LICENSE)
 
 CMake module to enable code coverage easily and generate coverage reports with CMake targets.
 
@@ -12,7 +14,7 @@ CMake module to enable code coverage easily and generate coverage reports with C
 To use [Findcodecov.cmake](cmake/Findcodecov.cmake), simply add this repository as git submodule into your own repository
 ```Shell
 mkdir externals
-git submodule add git://github.com/RWTH-ELP/CMake-codecov.git externals/CMake-codecov
+git submodule add git://github.com/RWTH-HPC/CMake-codecov.git externals/CMake-codecov
 ```
 and adding ```externals/cmake-codecov/cmake``` to your ```CMAKE_MODULE_PATH```
 ```CMake
