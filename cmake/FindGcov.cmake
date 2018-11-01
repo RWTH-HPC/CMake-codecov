@@ -35,7 +35,7 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			find_program(GCOV_BIN NAMES gcov-${GCC_VERSION} gcov
 				HINTS ${COMPILER_PATH})
 
-		elseif ("${CMAKE_${LANG}_COMPILER_ID}" STREQUAL "Clang")
+		elseif ("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 			# Some distributions like Debian ship llvm-cov with the compiler
 			# version appended as llvm-cov-x.y. To find this binary we'll build
 			# the suggested binary name with the compiler version.
