@@ -105,8 +105,9 @@ endif (NOT TARGET gcov)
 # Gcov on any source file of <TNAME> once and store the gcov file in the same
 # directory.
 function (add_gcov_target TNAME)
-	set(TDIR ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${TNAME}.dir)
-
+	get_target_property(TBIN_DIR ${TNAME} BINARY_DIR)
+	set(TDIR ${TBIN_DIR}/CMakeFiles/${TNAME}.dir)
+	
 	# We don't have to check, if the target has support for coverage, thus this
 	# will be checked by add_coverage_target in Findcoverage.cmake. Instead we
 	# have to determine which gcov binary to use.
