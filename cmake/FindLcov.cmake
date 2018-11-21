@@ -258,14 +258,20 @@ function (lcov_capture_tgt TNAME)
 		set(OUTFILE "${TDIR}/${FILE}.info")
 		list(APPEND GENINFO_FILES ${OUTFILE})
 
+		# Create an empty .gcda file, so the target capture file can have a dependency on it.
+		# The capture file will only use this .gcda if it has a non-zero size (test -s).
+		add_custom_command(OUTPUT "${TDIR}/${FILE}.gcda"
+			COMMAND "${CMAKE_COMMAND}" -E touch "${TDIR}/${FILE}.gcda"
+		)
+
 		add_custom_command(OUTPUT ${OUTFILE}
-			COMMAND test -f "${TDIR}/${FILE}.gcda"
+			COMMAND test -s "${TDIR}/${FILE}.gcda"
 				&& ${GCOV_ENV} ${GENINFO_BIN} --quiet --base-directory
 					${PROJECT_SOURCE_DIR} --gcov-tool ${GCOV_BIN}
 					--output-filename ${OUTFILE} ${GENINFO_EXTERN_FLAG}
 					${TDIR}/${FILE}.gcda
 				|| cp ${OUTFILE}.init ${OUTFILE}
-			DEPENDS ${TNAME} ${TNAME}-capture-init
+			DEPENDS ${TNAME} ${TNAME}-capture-init "${TDIR}/${FILE}.gcda"
 			COMMENT "Capturing coverage data for ${FILE}"
 		)
 	endforeach()
