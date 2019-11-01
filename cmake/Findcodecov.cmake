@@ -133,7 +133,7 @@ set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 
 # Helper function to get the language of a source file.
 function (codecov_lang_of_source FILE RETURN_VAR)
-	get_filename_component(FILE_EXT "${FILE}" EXT)
+	get_filename_component(FILE_EXT "${FILE}" LAST_EXT)
 	string(TOLOWER "${FILE_EXT}" FILE_EXT)
 	string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
 
