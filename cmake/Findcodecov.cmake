@@ -133,7 +133,15 @@ set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 
 # Helper function to get the language of a source file.
 function (codecov_lang_of_source FILE RETURN_VAR)
-	get_filename_component(FILE_EXT "${FILE}" LAST_EXT)
+	# Usually, only the last extension of the file should be checked, to avoid
+	# template files (i.e. *.t.cpp) are checked with the full file extension.
+	# However, this feature requires CMake 3.14 or later.
+	set(EXT_COMP "LAST_EXT")
+	if(${CMAKE_VERSION} VERSION_LESS "3.14.0")
+		set(EXT_COMP "EXT")
+	endif()
+
+	get_filename_component(FILE_EXT "${FILE}" ${EXT_COMP})
 	string(TOLOWER "${FILE_EXT}" FILE_EXT)
 	string(SUBSTRING "${FILE_EXT}" 1 -1 FILE_EXT)
 
