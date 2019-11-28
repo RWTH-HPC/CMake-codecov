@@ -3,17 +3,17 @@ language: c
 matrix:
   include:
     - os: linux
+      dist: xenial
       compiler: gcc
     - os: linux
+      dist: xenial
       compiler: clang
 
     - os: linux
-      dist: trusty
-      sudo: false
+      dist: bionic
       compiler: gcc
     - os: linux
-      dist: trusty
-      sudo: false
+      dist: bionic
       compiler: clang
 
     - os: osx
@@ -22,8 +22,6 @@ matrix:
 
 addons:
   apt:
-    sources:
-      - kalakris-cmake
     packages:
       - cmake
       - lcov
