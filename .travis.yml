@@ -57,9 +57,7 @@ before_install:
 
 script:
   - mkdir build && cd build
-  - cmake .. -DENABLE_COVERAGE=On && make && make test
-  - make gcov
-  - make lcov
+  - cmake .. -DENABLE_COVERAGE=On && make && make test gcov lcov
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X gcov
