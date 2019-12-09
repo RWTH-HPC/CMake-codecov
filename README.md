@@ -44,6 +44,10 @@ Different compilers may be using different implementations for code coverage. If
 
 Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. [FindGcov.cmake](cmake/FindGcov.cmake) tries to find a compatible coverage evaluation tool to avoid this issue, but may fail. In this case you should check coverage with a different compiler or install a compatible coverage tool.
 
+#### File extensions
+
+Starting with CMake `3.14`, this module will use the last file extension only (i.e. `.c` for `a.b.c`). Prior versions will use the full file extension starting with the first dot in the file name.
+
 ### Build targets with coverage support
 
 To enable coverage support you have two options: You can mark targets explictly for coverage by adding your target with ```add_coverage()```. This call must be done in the same directory as your ```add_executable()```or ```add_library()``` call:
@@ -112,4 +116,4 @@ You found a bug? Please fill out an issue and include any data to reproduce the 
 
 CMake-codecov is released under the 3-clause BSD license. See the [LICENSE](LICENSE) file for more information.
 
-Copyright &copy; 2015-2017 RWTH Aachen University, Federal Republic of Germany.
+Copyright &copy; 2015-2019 RWTH Aachen University, Federal Republic of Germany.

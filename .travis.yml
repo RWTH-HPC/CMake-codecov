@@ -1,19 +1,29 @@
+# This file is part of CMake-codecov.
+#
+# Copyright (c)
+#   2015-2019 RWTH Aachen University, Federal Republic of Germany
+#
+# See the LICENSE file in the package base directory for details
+#
+# Written by Alexander Haase, alexander.haase@rwth-aachen.de
+#
+
 language: c
 
 matrix:
   include:
     - os: linux
+      dist: xenial
       compiler: gcc
     - os: linux
+      dist: xenial
       compiler: clang
 
     - os: linux
-      dist: trusty
-      sudo: false
+      dist: bionic
       compiler: gcc
     - os: linux
-      dist: trusty
-      sudo: false
+      dist: bionic
       compiler: clang
 
     - os: osx
@@ -22,8 +32,6 @@ matrix:
 
 addons:
   apt:
-    sources:
-      - kalakris-cmake
     packages:
       - cmake
       - lcov
@@ -49,9 +57,7 @@ before_install:
 
 script:
   - mkdir build && cd build
-  - cmake .. -DENABLE_COVERAGE=On && make && make test
-  - make gcov
-  - make lcov
+  - cmake .. -DENABLE_COVERAGE=On && make && make test gcov lcov
 
 after_success:
   - bash <(curl -s https://codecov.io/bash) -X gcov

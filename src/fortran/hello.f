@@ -1,7 +1,7 @@
 C This file is part of CMake-codecov.
 C
 C Copyright (c)
-C   2015-2017 RWTH Aachen University, Federal Republic of Germany
+C   2015-2019 RWTH Aachen University, Federal Republic of Germany
 C
 C See the LICENSE file in the package base directory for details
 C
