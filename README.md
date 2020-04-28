@@ -116,4 +116,4 @@ You found a bug? Please fill out an issue and include any data to reproduce the 
 
 CMake-codecov is released under the 3-clause BSD license. See the [LICENSE](LICENSE) file for more information.
 
-Copyright &copy; 2015-2019 RWTH Aachen University, Federal Republic of Germany.
+Copyright &copy; 2015-2020 RWTH Aachen University, Federal Republic of Germany.

@@ -1,7 +1,7 @@
 # This file is part of CMake-codecov.
 #
 # Copyright (c)
-#   2015-2019 RWTH Aachen University, Federal Republic of Germany
+#   2015-2020 RWTH Aachen University, Federal Republic of Germany
 #
 # See the LICENSE file in the package base directory for details
 #
@@ -253,7 +253,7 @@ function (lcov_capture_tgt TNAME)
 
 	get_target_property(TBIN_DIR ${TNAME} BINARY_DIR)
 	set(TDIR ${TBIN_DIR}/CMakeFiles/${TNAME}.dir)
-	
+
 	set(GENINFO_FILES "")
 	foreach(FILE ${SOURCES})
 		# Generate coverage files. If no .gcda file was generated during
