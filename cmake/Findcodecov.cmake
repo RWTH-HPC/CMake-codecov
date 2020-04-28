@@ -249,8 +249,13 @@ function(add_coverage_target TNAME)
 		list(APPEND CLEAN_FILES "CMakeFiles/${TNAME}.dir/${FILE}")
 	endforeach()
 
-	set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
-		"${CLEAN_FILES}")
+	if(${CMAKE_VERSION} VERSION_LESS "3.15.0")
+		set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES
+			"${CLEAN_FILES}")
+	else()
+		set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES
+		"${CLEAN_FILES}")	
+	endif()
 
 
 	add_gcov_target(${TNAME})
