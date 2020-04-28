@@ -254,7 +254,7 @@ function(add_coverage_target TNAME)
 			"${CLEAN_FILES}")
 	else()
 		set_directory_properties(PROPERTIES ADDITIONAL_CLEAN_FILES
-		"${CLEAN_FILES}")	
+			"${CLEAN_FILES}")
 	endif()
 
 
