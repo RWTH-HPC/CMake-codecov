@@ -136,12 +136,16 @@ function (add_gcov_target TNAME)
 
 
 	set(BUFFER "")
+	set(NULL_DEVICE "/dev/null")
+	if(WIN32)
+		set(NULL_DEVICE "NUL")
+	endif()
 	foreach(FILE ${SOURCES})
 		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_ENV} ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${FILE_PATH}
 		)
