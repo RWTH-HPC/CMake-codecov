@@ -141,7 +141,7 @@ function (add_gcov_target TNAME)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_ENV} ${GCOV_BIN} ${TDIR}/${FILE}.gcno > /dev/null
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} -r -s ${PROJECT_SOURCE_DIR} ${TDIR}/${FILE}.gcno > /dev/null
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${FILE_PATH}
 		)
