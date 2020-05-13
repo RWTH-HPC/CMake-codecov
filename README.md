@@ -18,7 +18,7 @@ git submodule add git://github.com/RWTH-HPC/CMake-codecov.git externals/CMake-co
 ```
 and adding ```externals/cmake-codecov/cmake``` to your ```CMAKE_MODULE_PATH```
 ```CMake
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/cmake-codecov/cmake" ${CMAKE_MODULE_PATH})
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/CMake-codecov/cmake" ${CMAKE_MODULE_PATH})
 ```
 
 If you don't use git or dislike submodules you can copy the [Findcodecov.cmake](cmake/Findcodecov.cmake), [FindGcov.cmake](cmake/FindGcov.cmake) and [FindLcov.cmake](cmake/FindLcov.cmake) files into your repository. *Be careful when there are version updates of this repository!*
