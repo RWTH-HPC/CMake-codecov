@@ -145,9 +145,9 @@ function (add_gcov_target TNAME)
 
 		# call gcov
 		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_ENV} ${GCOV_BIN} ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} -p ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
-			WORKING_DIRECTORY ${FILE_PATH}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 
 		list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
