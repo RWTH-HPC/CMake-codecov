@@ -70,7 +70,7 @@ if (GENINFO_BIN AND NOT DEFINED GENINFO_EXTERN_FLAG)
 	execute_process(COMMAND ${GENINFO_BIN} --help OUTPUT_VARIABLE GENINFO_HELP)
 	string(REGEX MATCH "external" GENINFO_RES "${GENINFO_HELP}")
 	if (GENINFO_RES)
-		set(FLAG "--no-external")
+		#set(FLAG "--no-external")
 	endif ()
 
 	set(GENINFO_EXTERN_FLAG "${FLAG}"
@@ -91,6 +91,8 @@ file(MAKE_DIRECTORY ${LCOV_DATA_PATH_CAPTURE})
 
 set(LCOV_REMOVE_PATTERNS "")
 
+#set(BASE_DIRECTORY "--base-directory ${PROJECT_SOURCE_DIR}")
+
 # This function will merge lcov files to a single target file. Additional lcov
 # flags may be set with setting LCOV_EXTRA_FLAGS before calling this function.
 function (lcov_merge_files OUTFILE ...)
@@ -107,7 +109,7 @@ function (lcov_merge_files OUTFILE ...)
 
 	add_custom_command(OUTPUT "${OUTFILE}"
 		COMMAND ${LCOV_BIN} --quiet -a ${OUTFILE}.raw --output-file ${OUTFILE}
-			--base-directory ${PROJECT_SOURCE_DIR} ${LCOV_EXTRA_FLAGS}
+			${BASE_DIRECTORY} ${LCOV_EXTRA_FLAGS}
 		COMMAND ${LCOV_BIN} --quiet -r ${OUTFILE} ${LCOV_REMOVE_PATTERNS}
 			--output-file ${OUTFILE} ${LCOV_EXTRA_FLAGS}
 		DEPENDS ${OUTFILE}.raw
@@ -169,7 +171,7 @@ function (lcov_capture_initial_tgt TNAME)
 		list(APPEND GENINFO_FILES ${OUTFILE})
 
 		add_custom_command(OUTPUT ${OUTFILE} COMMAND ${GCOV_ENV} ${GENINFO_BIN}
-				--quiet --base-directory ${PROJECT_SOURCE_DIR} --initial
+				--quiet ${BASE_DIRECTORY} --initial
 				--gcov-tool ${GCOV_BIN} --output-filename ${OUTFILE}
 				${GENINFO_EXTERN_FLAG} ${TDIR}/${FILE}.gcno
 			DEPENDS ${TNAME}
@@ -269,8 +271,8 @@ function (lcov_capture_tgt TNAME)
 
 		add_custom_command(OUTPUT ${OUTFILE}
 			COMMAND test -s "${TDIR}/${FILE}.gcda"
-				&& ${GCOV_ENV} ${GENINFO_BIN} --quiet --base-directory
-					${PROJECT_SOURCE_DIR} --gcov-tool ${GCOV_BIN}
+				&& ${GCOV_ENV} ${GENINFO_BIN} --quiet ${BASE_DIRECTORY}
+					--gcov-tool ${GCOV_BIN}
 					--output-filename ${OUTFILE} ${GENINFO_EXTERN_FLAG}
 					${TDIR}/${FILE}.gcda
 				|| cp ${OUTFILE}.init ${OUTFILE}
