@@ -59,8 +59,6 @@ add_library(some_lib foo.c bar.c)
 add_coverage(some_lib)
 ```
 
-The second option is to enable ```ENABLE_COVERAGE_ALL``` option, which will enable coverage for **all** targets. You can do this by passing ```-ENABLE_COVERAGE_ALL=On``` on your command line or with your graphical interface.
-
 
 ### Executing your program
 
