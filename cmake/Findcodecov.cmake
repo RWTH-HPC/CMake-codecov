@@ -74,56 +74,60 @@ set(CMAKE_REQUIRED_QUIET ${codecov_FIND_QUIETLY})
 
 get_property(ENABLED_LANGUAGES GLOBAL PROPERTY ENABLED_LANGUAGES)
 foreach (LANG ${ENABLED_LANGUAGES})
-	# Coverage flags are not dependent on language, but the used compiler. So
-	# instead of searching flags foreach language, search flags foreach compiler
-	# used.
-	set(COMPILER ${CMAKE_${LANG}_COMPILER_ID})
-	if (NOT COVERAGE_${COMPILER}_FLAGS)
-		foreach (FLAG ${COVERAGE_FLAG_CANDIDATES})
-			if(NOT CMAKE_REQUIRED_QUIET)
-				message(STATUS "Try ${COMPILER} code coverage flag = [${FLAG}]")
-			endif()
+    if (${LANG} MATCHES "^(C|CXX|Fortran)$")
+        # Coverage flags are not dependent on language, but the used compiler. So
+        # instead of searching flags foreach language, search flags foreach compiler
+        # used.
+        set(COMPILER ${CMAKE_${LANG}_COMPILER_ID})
+        if (NOT COVERAGE_${COMPILER}_FLAGS)
+            foreach (FLAG ${COVERAGE_FLAG_CANDIDATES})
+                if(NOT CMAKE_REQUIRED_QUIET)
+                    message(STATUS "Try ${COMPILER} code coverage flag = [${FLAG}]")
+                endif()
 
-			set(CMAKE_REQUIRED_FLAGS "${FLAG}")
-			unset(COVERAGE_FLAG_DETECTED CACHE)
+                set(CMAKE_REQUIRED_FLAGS "${FLAG}")
+                unset(COVERAGE_FLAG_DETECTED CACHE)
 
-			if (${LANG} STREQUAL "C")
-				include(CheckCCompilerFlag)
-				check_c_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
+                if (${LANG} STREQUAL "C")
+                    include(CheckCCompilerFlag)
+                    check_c_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
 
-			elseif (${LANG} STREQUAL "CXX")
-				include(CheckCXXCompilerFlag)
-				check_cxx_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
+                elseif (${LANG} STREQUAL "CXX")
+                    include(CheckCXXCompilerFlag)
+                    check_cxx_compiler_flag("${FLAG}" COVERAGE_FLAG_DETECTED)
 
-			elseif (${LANG} STREQUAL "Fortran")
-				# CheckFortranCompilerFlag was introduced in CMake 3.x. To be
-				# compatible with older Cmake versions, we will check if this
-				# module is present before we use it. Otherwise we will define
-				# Fortran coverage support as not available.
-				include(CheckFortranCompilerFlag OPTIONAL
-					RESULT_VARIABLE INCLUDED)
-				if (INCLUDED)
-					check_fortran_compiler_flag("${FLAG}"
-						COVERAGE_FLAG_DETECTED)
-				elseif (NOT CMAKE_REQUIRED_QUIET)
-					message("-- Performing Test COVERAGE_FLAG_DETECTED")
-					message("-- Performing Test COVERAGE_FLAG_DETECTED - Failed"
-						" (Check not supported)")
-				endif ()
-			endif()
+                elseif (${LANG} STREQUAL "Fortran")
+                    # CheckFortranCompilerFlag was introduced in CMake 3.x. To be
+                    # compatible with older Cmake versions, we will check if this
+                    # module is present before we use it. Otherwise we will define
+                    # Fortran coverage support as not available.
+                    include(CheckFortranCompilerFlag OPTIONAL
+                        RESULT_VARIABLE INCLUDED)
+                    if (INCLUDED)
+                        check_fortran_compiler_flag("${FLAG}"
+                            COVERAGE_FLAG_DETECTED)
+                    elseif (NOT CMAKE_REQUIRED_QUIET)
+                        message("-- Performing Test COVERAGE_FLAG_DETECTED")
+                        message("-- Performing Test COVERAGE_FLAG_DETECTED - Failed"
+                            " (Check not supported)")
+                    endif ()
+                endif()
 
-			if (COVERAGE_FLAG_DETECTED)
-				set(COVERAGE_${COMPILER}_FLAGS "${FLAG}"
-					CACHE STRING "${COMPILER} flags for code coverage.")
-				mark_as_advanced(COVERAGE_${COMPILER}_FLAGS)
-				break()
-			else ()
-				message(WARNING "Code coverage is not available for ${COMPILER}"
-				        " compiler. Targets using this compiler will be "
-				        "compiled without it.")
-			endif ()
-		endforeach ()
-	endif ()
+                if (COVERAGE_FLAG_DETECTED)
+                    set(COVERAGE_${COMPILER}_FLAGS "${FLAG}"
+                        CACHE STRING "${COMPILER} flags for code coverage.")
+                    mark_as_advanced(COVERAGE_${COMPILER}_FLAGS)
+                    break()
+                else ()
+                    message(WARNING "Code coverage is not available for ${COMPILER}"
+                            " compiler. Targets using this compiler will be "
+                            "compiled without it.")
+                endif ()
+            endforeach ()
+        endif ()
+    else ()
+        message(STATUS "Skipping coverage for unsupported language: ${LANG}")
+    endif ()
 endforeach ()
 
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
