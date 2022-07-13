@@ -17,6 +17,12 @@
 int
 main (int argc, char** argv)
 {
+	if (argc == 1)
+	{
+		printf("Zero arg\n");
+		return 0;
+	}
+
 	if (*argv[1] == '1')
 		printf("%d\n", foo());
 	else if (*argv[1] == '2')
