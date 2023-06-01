@@ -32,8 +32,15 @@ foreach (LANG ${ENABLED_LANGUAGES})
 			string(REGEX MATCH "^[0-9]+" GCC_VERSION
 				"${CMAKE_${LANG}_COMPILER_VERSION}")
 
-			find_program(GCOV_BIN NAMES gcov-${GCC_VERSION} gcov
-				HINTS ${COMPILER_PATH})
+			find_program(GCOV_BIN
+				NAMES
+					${CMAKE_${LANG}_COMPILER_TARGET}-gcov
+					gcov-${GCC_VERSION}
+					gcov
+				HINTS
+					${COMPILER_PATH}
+					ENV GCOV
+				)
 
 		elseif ("${CMAKE_${LANG}_COMPILER_ID}" MATCHES "^(Apple)?Clang$")
 			# Some distributions like Debian ship llvm-cov with the compiler
