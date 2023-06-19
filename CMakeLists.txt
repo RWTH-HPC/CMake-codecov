@@ -24,9 +24,9 @@ endif (POLICY CMP0042)
 # project information
 #
 if (${CMAKE_MAJOR_VERSION} EQUAL 3)
-	project("test" LANGUAGES C Fortran)
+	project("test" LANGUAGES C)
 else ()
-	project("test" C Fortran)
+	project("test" C)
 endif ()
 
 
