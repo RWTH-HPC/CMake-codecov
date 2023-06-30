@@ -265,6 +265,7 @@ function(add_coverage_target TNAME)
 
 	add_gcov_target(${TNAME})
 	add_lcov_target(${TNAME})
+	add_gcovr_target(${TNAME})
 endfunction(add_coverage_target)
 
 
@@ -274,3 +275,4 @@ endfunction(add_coverage_target)
 # format (like gcov and lcov).
 find_package(Gcov)
 find_package(Lcov)
+find_package(Gcovr)
