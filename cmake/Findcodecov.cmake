@@ -117,6 +117,8 @@ foreach (LANG ${ENABLED_LANGUAGES})
 				endif ()
 			endif()
 
+			unset(CMAKE_REQUIRED_FLAGS)
+
 			if (COVERAGE_FLAG_DETECTED)
 				set(COVERAGE_${COMPILER}_FLAGS "${FLAG}"
 					CACHE STRING "${COMPILER} flags for code coverage.")
