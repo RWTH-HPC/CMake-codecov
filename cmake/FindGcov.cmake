@@ -141,16 +141,26 @@ function (add_gcov_target TNAME)
 		set(NULL_DEVICE "NUL")
 	endif()
 	foreach(FILE ${SOURCES})
-		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
+		get_filename_component(FILE_NAME ${FILE} NAME)
+		get_filename_component(SRC_FILE ${FILE} ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR})
+		if (${CMAKE_GENERATOR} STREQUAL "Ninja")
+			file(RELATIVE_PATH SRC_FILE ${CMAKE_CURRENT_BINARY_DIR} ${SRC_FILE})
+		endif()
+
+		string(MD5 OUTPUT_FILE_NAME ${SRC_FILE})
+		set(OUTPUT_FILE ${TDIR}/${FILE}.gcov)
+		set(TEMP_OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/${FILE_NAME}\#\#${OUTPUT_FILE_NAME}.gcov)
 
 		# call gcov
-		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_ENV} ${GCOV_BIN} -p ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
+		add_custom_command(OUTPUT ${OUTPUT_FILE}
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} -x ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
+			COMMAND ${CMAKE_COMMAND} -E copy ${TEMP_OUTPUT_FILE} ${OUTPUT_FILE}
+			COMMAND ${CMAKE_COMMAND} -E remove ${TEMP_OUTPUT_FILE}
 			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 
-		list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+		list(APPEND BUFFER ${OUTPUT_FILE})
 	endforeach()
 
 
