@@ -15,7 +15,15 @@ cmake_minimum_required(VERSION 3.10)
 #
 # project information
 #
-project("test" LANGUAGES C Fortran)
+project("test" LANGUAGES C)
+
+#
+# check for Fortran support
+#
+include(CheckLanguage)
+check_language(Fortran)
+if(CMAKE_Fortran_COMPILER)
+  enable_language(Fortran)
 
 
 #
