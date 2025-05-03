@@ -13,4 +13,7 @@
 add_subdirectory(libfoo)
 add_subdirectory(bar)
 add_subdirectory(libheader)
-add_subdirectory(fortran)
+
+if(CMAKE_Fortran_COMPILER)
+    add_subdirectory(fortran)
+endif()
