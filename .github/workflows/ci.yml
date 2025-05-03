@@ -1,0 +1,50 @@
+# This file is part of CMake-codecov.
+#
+# Copyright (c)
+#   2015-2020 RWTH Aachen University, Federal Republic of Germany
+#
+# See the LICENSE file in the package base directory for details
+#
+# Written by Alexander Haase, alexander.haase@rwth-aachen.de
+#
+
+name: CMake-codecov CI
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, macos-latest]
+        compiler: [gcc, clang]
+        exclude:
+          - os: macos-latest
+            compiler: gcc
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install CMake, lcov, gfortran on Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake lcov gfortran
+      
+      - name: Install CMake, lcov on macOS
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake lcov gfortran
+
+      - name: Configure and build
+        run: |
+          mkdir build && cd build
+          cmake .. -DENABLE_COVERAGE=On
+          make
+          make gcov lcov test
