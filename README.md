@@ -1,3 +1,10 @@
+<!--
+SPDX-FileCopyrightText: RWTH Aachen University, Federal Republic of Germany
+SPDX-FileContributor: Alexander Haase, alexander.haase@rwth-aachen.de
+
+SPDX-License-Identifier: BSD-3-Clause
+-->
+
 # CMake-codecov
 
 [![Travis](https://img.shields.io/travis/RWTH-HPC/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-HPC/CMake-codecov)
@@ -114,4 +121,4 @@ You found a bug? Please fill out an issue and include any data to reproduce the 
 
 CMake-codecov is released under the 3-clause BSD license. See the [LICENSE](LICENSE) file for more information.
 
-Copyright &copy; 2015-2020 RWTH Aachen University, Federal Republic of Germany.
+Copyright &copy; 2015-2025 RWTH Aachen University, Federal Republic of Germany.
