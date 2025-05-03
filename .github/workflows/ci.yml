@@ -40,7 +40,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew update
-          brew install cmake lcov gfortran
+          brew install cmake lcov
 
       - name: Configure and build
         run: |
