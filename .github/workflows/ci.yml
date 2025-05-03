@@ -48,3 +48,10 @@ jobs:
           cmake .. -DENABLE_COVERAGE=On
           make
           make gcov lcov test
+
+      - name: lcov report
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: ./build/lcov
+
