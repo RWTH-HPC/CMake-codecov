@@ -7,14 +7,14 @@ SPDX-License-Identifier: BSD-3-Clause
 
 # CMake-codecov
 
-[![Travis](https://img.shields.io/travis/RWTH-HPC/CMake-codecov/master.svg?style=flat-square)](https://travis-ci.org/RWTH-HPC/CMake-codecov)
-[![Codecov](https://img.shields.io/codecov/c/github/RWTH-HPC/CMake-codecov.svg?style=flat-square)](https://codecov.io/github/RWTH-HPC/CMake-codecov?branch=master)
-[![](https://img.shields.io/github/issues-raw/RWTH-HPC/CMake-codecov.svg?style=flat-square)](https://github.com/RWTH-HPC/CMake-codecov/issues)
-[![](http://img.shields.io/badge/license-3--clause_BSD-blue.svg?style=flat-square)](LICENSE)
+[![CMake-codecov CI](https://github.com/RWTH-HPC/CMake-codecov/actions/workflows/ci.yml/badge.svg)](https://github.com/RWTH-HPC/CMake-codecov/actions/workflows/ci.yml)
+[![Codecov](https://img.shields.io/codecov/c/github/RWTH-HPC/CMake-codecov.svg)](https://codecov.io/github/RWTH-HPC/CMake-codecov?branch=master)
+[![](https://img.shields.io/github/issues-raw/RWTH-HPC/CMake-codecov.svg)](https://github.com/RWTH-HPC/CMake-codecov/issues)
+[![](http://img.shields.io/badge/license-3--clause_BSD-blue.svg)](LICENSE)
+![](https://img.shields.io/badge/CMake-3.10.3...4.0.1-blue)
 
-CMake module to enable code coverage easily and generate coverage reports with CMake targets.
 
-
+CMake module to enable code coverage easily and generate coverage reports with CMake targets
 
 ## Include into your project
 
@@ -30,7 +30,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/CMake-codecov/cmake" ${CMAK
 
 If you don't use git or dislike submodules you can copy the [Findcodecov.cmake](cmake/Findcodecov.cmake), [FindGcov.cmake](cmake/FindGcov.cmake) and [FindLcov.cmake](cmake/FindLcov.cmake) files into your repository. *Be careful when there are version updates of this repository!*
 
-Next you have to include the codecov package. This can be done in your root CMake file, or in the file were your targets will be defined:
+Next you have to include the codecov package. This can be done in your root CMake file, or in the file where your targets will be defined:
 ```CMake
 # enable code coverage
 find_package(codecov)
@@ -43,21 +43,12 @@ For coverage evaluation you have to add ```coverage_evaluate()``` after all othe
 
 To enable coverage support in general, you have to enable ```ENABLE_COVERAGE``` option in your CMake configuration. You can do this by passing ```-DENABLE_COVERAGE=On``` on your command line or with your graphical interface.
 
-If coverage is supported by your compiler, the specified targets will be build with coverage support. If your compiler has no coverage capabilities (I asume intel compiler doesn't) you'll get a warning but CMake will continue processing and coverage will simply just be ignored.
+If coverage is supported by your compiler, the specified targets will be build with coverage support. If your compiler has no coverage capabilities you will get a warning but CMake will continue processing and coverage will simply just be ignored. If you do not want these warnings to be printed, you might want to use the option `-Dcodecov_FIND_QUIETLY=ON`.
 
-#### Compiler issues
-
-Different compilers may be using different implementations for code coverage. If you'll try to cover targets with C and Fortran code but don't use gcc & gfortran but clang & gfortran, this will cause linking problems. To avoid this, such problems will be detected and coverage will be disabled for such targets.
-
-Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. [FindGcov.cmake](cmake/FindGcov.cmake) tries to find a compatible coverage evaluation tool to avoid this issue, but may fail. In this case you should check coverage with a different compiler or install a compatible coverage tool.
-
-#### File extensions
-
-Starting with CMake `3.14`, this module will use the last file extension only (i.e. `.c` for `a.b.c`). Prior versions will use the full file extension starting with the first dot in the file name.
 
 ### Build targets with coverage support
 
-To enable coverage support you have two options: You can mark targets explictly for coverage by adding your target with ```add_coverage()```. This call must be done in the same directory as your ```add_executable()```or ```add_library()``` call:
+To enable coverage support, you mark targets explicitly for coverage by adding your target with ```add_coverage()```. This call must be done in the same directory as your ```add_executable()```or ```add_library()``` call:
 ```CMake
 add_executable(some_exe foo.c bar.c)
 add_coverage(some_exe)
@@ -66,10 +57,9 @@ add_library(some_lib foo.c bar.c)
 add_coverage(some_lib)
 ```
 
-
 ### Executing your program
 
-To be able to evaluate your coverage data, you have to run your application first. Some projects include CMake tests - it might me a good idea to execute them now by ```make test```, but you can run your application however you want (e.g. by running ```./a.out```).
+To be able to evaluate your coverage data, you have to run your application first. Some projects include CMake tests - it might be a good idea to execute them now by ```make test```, but you can run your application however you want (e.g. by running ```./a.out```).
 
 
 ### Evaluating coverage data
@@ -81,7 +71,7 @@ Gcov is a console program to evaluate the generated coverage data. You can evalu
 | target  | description |
 |---------|-------------|
 |```<TARGET>-gcov```|Evaluate coverage data for target ```<TARGET>```.|
-|```gcov```|Evaluate the coverage data of all your targets. **Warning:** You have to run programs generated by every target before you can call this target without any error. Otherwise you might get errors, if ```*.gcda``` files will not be found.|
+|```gcov```|Evaluate the coverage data of all your targets. **Warning:** You have to run programs generated by every target before you can call this target without any error. Otherwise, you might get errors, if ```*.gcda``` files will not be found.|
 
 The files generated by Gcov reside in the binary directory of the target ```<TARGET>``` you're evaluating the coverage data for (e.g. for target ```bar``` in this repository it'll be ```${CMAKE_BINARY_DIR}/src/bar/CMakeFiles/bar.dir/```).
 
@@ -98,12 +88,36 @@ Lcov is a console program to evaluate the generate coverage data, but instead of
 |```lcov-genhtml```|Generate a *single* report for all evaluated data that is available now. **Note:** You have to call ```<TARGET>-geninfo``` for all targets you want to have in this report before calling this target or ```lcov-geninfo```. You can use this option, if you like to have a single report for the targets ```foo``` and ```bar``` together, but without all the other targets. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/selected_targets```.|
 |```lcov```|Generate a *single* report for all targets. This target will call ```lcov-geninfo``` before. Reports will be generated in ```${CMAKE_BINARY_DIR}/lcov/html/all_targets```.|
 
+
+
 ##### Excluding files from coverage reports
 If you want to exclude some files from your coverage reports by ```lcov --remove``` subcommand, you can append their path patterns to ```LCOV_REMOVE_PATTERNS``` in your CMakeLists.txt like a following example.
 ```CMake
 list(APPEND LCOV_REMOVE_PATTERNS "'${PROJECT_SOURCE_DIR}/extlib/*'")
 ```
 Note that asterisks in patterns should not be expanded by the shell interpreter.
+
+#### Passing extra flags to lcov / geninfo
+If you want to pass extra flags to the calls of `lcov` or `geninfo`, you can use `-DGENINFO_EXTRA_FLAGS` and `-DLCOV_EXTRA_FLAGS`.
+
+
+## Compatibility
+
+CMake-codecov has been tested with CMake 3.10 up to 4.0 and works with `Unix Makefiles` and `Ninja` generators.
+
+**Note:** When using the `Ninja` generator, CMake-codecov requires a version of CMake >= `3.21`.
+
+
+### Compiler issues
+
+Different compilers may be using different implementations for code coverage. If you'll try to cover targets with C and Fortran code but don't use gcc & gfortran but clang & gfortran, this will cause linking problems. To avoid this, such problems will be detected and coverage will be disabled for such targets.
+
+Even C only targets may cause problems, if e.g. clang compiles the coverage for an older gcov version than the one is shipped with your distribution. [FindGcov.cmake](cmake/FindGcov.cmake) tries to find a compatible coverage evaluation tool to avoid this issue, but may fail. In this case you should check coverage with a different compiler or install a compatible coverage tool.
+
+### File extensions
+
+Starting with CMake `3.14`, this module will use the last file extension only (i.e. `.c` for `a.b.c`). Prior versions will use the full file extension starting with the first dot in the file name.
+
 
 
 ## Contribute
