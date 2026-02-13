@@ -139,16 +139,21 @@ function (add_gcov_target TNAME)
 		set(NULL_DEVICE "NUL")
 	endif()
 	foreach(FILE ${SOURCES})
-		get_filename_component(FILE_PATH "${TDIR}/${FILE}" PATH)
+    get_target_property(T_SOURCE_DIR ${TNAME} SOURCE_DIR)
+    get_filename_component(ABS_FILE "${FILE}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    file(RELATIVE_PATH REL_FILE "${T_SOURCE_DIR}" "${ABS_FILE}")
+
+    set(OUTFILE "${TDIR}/${REL_FILE}.info.init")
+    list(APPEND GENINFO_FILES ${OUTFILE})
 
 		# call gcov
-		add_custom_command(OUTPUT ${TDIR}/${FILE}.gcov
-			COMMAND ${GCOV_ENV} ${GCOV_BIN} -p ${TDIR}/${FILE}.gcno > ${NULL_DEVICE}
-			DEPENDS ${TNAME} ${TDIR}/${FILE}.gcno
+		add_custom_command(OUTPUT ${TDIR}/${REL_FILE}.gcov
+			COMMAND ${GCOV_ENV} ${GCOV_BIN} -p ${TDIR}/${REL_FILE}.gcno > ${NULL_DEVICE}
+			DEPENDS ${TNAME} ${TDIR}/${REL_FILE}.gcno
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 		)
 
-		list(APPEND BUFFER ${TDIR}/${FILE}.gcov)
+		list(APPEND BUFFER ${TDIR}/${REL_FILE}.gcov)
 	endforeach()
 
 
