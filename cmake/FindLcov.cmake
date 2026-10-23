@@ -205,9 +205,10 @@ function (lcov_capture_initial)
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_INIT}/all_targets.info")
 	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_INIT_FILES})
-	add_custom_target(lcov-geninfo-init ALL	DEPENDS ${OUTFILE}
-		lcov-capture-init
-	)
+	if (NOT TARGET lcov-geninfo-init)
+	        add_custom_target(lcov-geninfo-init ALL	DEPENDS ${OUTFILE}
+		    lcov-capture-init)
+	endif()
 endfunction (lcov_capture_initial)
 
 
@@ -318,8 +319,9 @@ function (lcov_capture)
 	# Add a new target to merge the files of all targets.
 	set(OUTFILE "${LCOV_DATA_PATH_CAPTURE}/all_targets.info")
 	lcov_merge_files("${OUTFILE}" ${LCOV_CAPTURE_FILES})
-	add_custom_target(lcov-geninfo DEPENDS ${OUTFILE} lcov-capture)
-
+	if (NOT TARGET lcov-geninfo)
+        	add_custom_target(lcov-geninfo DEPENDS ${OUTFILE} lcov-capture)
+	endif()
 	# Add a new global target for all lcov targets. This target could be used to
 	# generate the lcov html output for the whole project instead of calling
 	# <TARGET>-geninfo and <TARGET>-genhtml for each target. It will also be
